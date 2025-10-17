@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Pie Chart">
+<path id="Ellipse 1" d="M144 75C144 86.1232 141.311 97.0814 136.162 106.941C131.013 116.801 123.556 125.269 114.428 131.625C105.3 137.981 94.7702 142.036 83.7366 143.445C72.7029 144.853 61.4923 143.573 51.0601 139.714" stroke="var(--stroke-0, #BAD133)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Ellipse 2" d="M36.3615 132.167C28.054 126.552 21.0701 119.194 15.896 110.605C10.7219 102.016 7.48194 92.4027 6.40163 82.434C5.32133 72.4653 6.42667 62.381 9.6407 52.883C12.8547 43.385 18.1002 34.7017 25.012 27.4375" stroke="var(--stroke-0, #17B26A)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Ellipse 4" d="M36.3967 17.8092C48.6664 9.52727 63.2743 5.41089 78.063 6.06802" stroke="var(--stroke-0, #FF2D55)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Ellipse 3" d="M93.4666 8.51705C105.473 11.852 116.352 18.376 124.949 27.3963C133.546 36.4167 139.539 47.5967 142.294 59.7493" stroke="var(--stroke-0, #2970FF)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>
