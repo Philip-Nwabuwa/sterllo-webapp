@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import WelcomeBack from "./components/WelcomeBack";
 import Dashboard from "./components/Dashboard";
+import Wallets from "./components/Wallets";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<WelcomeBack />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/wallets" element={<Wallets />} />
       </Routes>
     </Router>
   );

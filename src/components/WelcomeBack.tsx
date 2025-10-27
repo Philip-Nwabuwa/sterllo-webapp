@@ -27,44 +27,14 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+// Reusable Components
+import Logo from "./common/Logo";
+
 // SVG Assets - Local imports
-import logoIcon from "../assets/icons/logo-icon.svg";
-import logoText from "../assets/icons/logo-text.svg";
 import bgImage from "../assets/images/bg-image.svg";
 import securityIcon from "../assets/icons/security-icon.svg";
 import emailIcon from "../assets/icons/email-icon.svg";
 import passwordIcon from "../assets/icons/password-icon.svg";
-
-interface LogoProps {
-  className?: string;
-}
-
-function Logo({ className }: LogoProps) {
-  return (
-    <div className={className} data-name="Logo">
-      <div
-        className="absolute bottom-0 left-0 right-[76.57%] top-0"
-        data-name="Icon"
-      >
-        <img
-          alt="Sterllo Icon"
-          className="block max-w-none size-full"
-          src={logoIcon}
-        />
-      </div>
-      <div
-        className="absolute bottom-[16.41%] left-[34.3%] right-0 top-[16.42%]"
-        data-name="Text"
-      >
-        <img
-          alt="Sterllo"
-          className="block max-w-none size-full"
-          src={logoText}
-        />
-      </div>
-    </div>
-  );
-}
 
 export default function WelcomeBack() {
   const navigate = useNavigate();
