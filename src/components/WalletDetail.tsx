@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "./layout/Header";
+import ReceiptModal, { type ReceiptData } from "./ReceiptModal";
 
 import BankIcon from "../assets/icons/bank.svg";
 import exportIcon from "../assets/icons/export-icon.svg";
@@ -39,6 +40,10 @@ const walletDetailsData: Record<
       amount: string;
       balance: string;
       date: string;
+      time?: string;
+      referenceId?: string;
+      fee?: string;
+      openingBalance?: string;
       status: TransactionStatus;
     }>;
   }
@@ -98,6 +103,10 @@ const walletDetailsData: Record<
         amount: "€300,750.00",
         balance: "€300,750.00",
         date: "2024-10-02",
+        time: "13:58:34",
+        referenceId: "TRF-EUR-0001",
+        fee: "€25.00",
+        openingBalance: "€500,000.00",
         status: "Processing",
       },
       {
@@ -105,6 +114,10 @@ const walletDetailsData: Record<
         amount: "€300,750.00",
         balance: "€300,750.00",
         date: "2024-10-02",
+        time: "10:12:05",
+        referenceId: "TRF-EUR-0002",
+        fee: "€25.00",
+        openingBalance: "€600,000.00",
         status: "Completed",
       },
       {
@@ -112,6 +125,10 @@ const walletDetailsData: Record<
         amount: "€300,750.00",
         balance: "€300,750.00",
         date: "2024-10-02",
+        time: "09:01:11",
+        referenceId: "TRF-EUR-0003",
+        fee: "€25.00",
+        openingBalance: "€900,000.00",
         status: "Completed",
       },
       {
@@ -119,6 +136,10 @@ const walletDetailsData: Record<
         amount: "€300,750.00",
         balance: "€300,750.00",
         date: "2024-10-02",
+        time: "08:43:50",
+        referenceId: "TRF-EUR-0004",
+        fee: "€25.00",
+        openingBalance: "€1,200,000.00",
         status: "Failed",
       },
       {
@@ -196,6 +217,10 @@ const walletDetailsData: Record<
         amount: "GH₵55,400.00",
         balance: "GH₵55,400.00",
         date: "2024-09-30",
+        time: "14:22:01",
+        referenceId: "TRF-GHS-1001",
+        fee: "GH₵5.00",
+        openingBalance: "GH₵60,400.00",
         status: "Completed",
       },
       {
@@ -239,6 +264,10 @@ const walletDetailsData: Record<
         amount: "CHf200,250.00",
         balance: "CHf200,250.00",
         date: "2024-09-27",
+        time: "11:47:22",
+        referenceId: "TRF-CHF-2001",
+        fee: "CHf10.00",
+        openingBalance: "CHf300,250.00",
         status: "Processing",
       },
       {
@@ -275,6 +304,10 @@ const walletDetailsData: Record<
         amount: "£45,000.00",
         balance: "£45,000.00",
         date: "2024-09-30",
+        time: "16:10:45",
+        referenceId: "TRF-GBP-3001",
+        fee: "£12.00",
+        openingBalance: "£90,000.00",
         status: "Completed",
       },
       {
@@ -311,6 +344,10 @@ const walletDetailsData: Record<
         amount: "USh130,000.00",
         balance: "USh130,000.00",
         date: "2024-10-01",
+        time: "12:00:00",
+        referenceId: "TRF-UGX-4001",
+        fee: "USh1,000.00",
+        openingBalance: "USh260,000.00",
         status: "Completed",
       },
     ],
@@ -334,6 +371,10 @@ const walletDetailsData: Record<
         amount: "C$78,900.00",
         balance: "C$78,900.00",
         date: "2024-10-03",
+        time: "15:30:10",
+        referenceId: "TRF-CAD-5001",
+        fee: "C$3.00",
+        openingBalance: "C$100,000.00",
         status: "Processing",
       },
     ],
@@ -357,6 +398,10 @@ const walletDetailsData: Record<
         amount: "A$150,600.00",
         balance: "A$150,600.00",
         date: "2024-10-04",
+        time: "07:45:55",
+        referenceId: "TRF-AUD-6001",
+        fee: "A$8.00",
+        openingBalance: "A$200,600.00",
         status: "Completed",
       },
     ],
@@ -380,6 +425,10 @@ const walletDetailsData: Record<
         amount: "¥90,000.00",
         balance: "¥90,000.00",
         date: "2024-09-29",
+        time: "19:20:01",
+        referenceId: "TRF-JPY-7001",
+        fee: "¥250.00",
+        openingBalance: "¥120,000.00",
         status: "Completed",
       },
     ],
@@ -403,6 +452,10 @@ const walletDetailsData: Record<
         amount: "RF99,999.00",
         balance: "RF99,999.00",
         date: "2024-09-29",
+        time: "09:09:09",
+        referenceId: "TRF-RWF-8001",
+        fee: "RF100.00",
+        openingBalance: "RF150,000.00",
         status: "Completed",
       },
     ],
@@ -426,6 +479,10 @@ const walletDetailsData: Record<
         amount: "$99,999.00",
         balance: "$99,999.00",
         date: "2024-09-29",
+        time: "18:18:18",
+        referenceId: "TRF-USD-9001",
+        fee: "$5.00",
+        openingBalance: "$150,000.00",
         status: "Completed",
       },
     ],
@@ -465,6 +522,8 @@ export default function WalletDetail() {
   >("transfers");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedWallet, setSelectedWallet] = useState(0);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
 
   const walletData = walletDetailsData[id as keyof typeof walletDetailsData];
 
@@ -840,19 +899,38 @@ export default function WalletDetail() {
                                 </div>
                               </div>
                               <div className="box-border content-stretch flex items-center justify-center min-h-10 px-4 py-2 relative shrink-0 w-[80px]">
-                                <svg
-                                  className="relative shrink-0 size-5 cursor-pointer"
-                                  viewBox="0 0 20 20"
-                                  fill="none"
+                                <button
+                                  aria-label="View receipt"
+                                  onClick={() => {
+                                    setReceiptData({
+                                      service: transaction.service,
+                                      amount: transaction.amount,
+                                      date: transaction.date,
+                                      time: transaction.time,
+                                      fee: transaction.fee,
+                                      openingBalance:
+                                        transaction.openingBalance,
+                                      closingBalance: transaction.balance,
+                                      referenceId: transaction.referenceId,
+                                      status: transaction.status,
+                                    });
+                                    setShowReceipt(true);
+                                  }}
                                 >
-                                  <path
-                                    d="M7.5 14.1667L12.5 9.16667L7.5 4.16667"
-                                    stroke="#a2a2a2"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
+                                  <svg
+                                    className="relative shrink-0 size-5 cursor-pointer"
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M7.5 14.1667L12.5 9.16667L7.5 4.16667"
+                                      stroke="#a2a2a2"
+                                      strokeWidth="1.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                </button>
                               </div>
                             </div>
                           );
@@ -901,6 +979,11 @@ export default function WalletDetail() {
           </div>
         </div>
       </div>
+      <ReceiptModal
+        open={showReceipt}
+        onClose={() => setShowReceipt(false)}
+        data={receiptData}
+      />
     </div>
   );
 }
