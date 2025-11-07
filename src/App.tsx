@@ -8,6 +8,9 @@ import WelcomeBack from "./components/WelcomeBack";
 import Dashboard from "./components/Dashboard";
 import Wallets from "./components/Wallets";
 import WalletDetail from "./components/WalletDetail";
+import Customers from "./components/Customers";
+import CustomerDetail from "./components/CustomerDetail";
+import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 
 function App() {
   return (
@@ -15,9 +18,15 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<WelcomeBack />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/wallets" element={<Wallets />} />
-        <Route path="/wallets/:id" element={<WalletDetail />} />
+
+        {/* Authenticated Routes with Layout */}
+        <Route element={<AuthenticatedLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/wallets" element={<Wallets />} />
+          <Route path="/wallets/:id" element={<WalletDetail />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/customers/:id" element={<CustomerDetail />} />
+        </Route>
       </Routes>
     </Router>
   );

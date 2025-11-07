@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Reusable Components
-import Header from "./layout/Header";
 import MetricCard from "./dashboard/MetricCard";
 
 // Metric Icons
@@ -192,30 +191,23 @@ export default function Wallets() {
       className="bg-neutral-950 relative size-full min-h-screen pb-10"
       data-name="Wallets"
     >
-      {/* Header */}
-      <Header variant="bordered" />
-
       {/* Page Header */}
-      <div className="bg-[#0a0a0a] box-border content-stretch flex gap-4 items-end left-0 p-6 top-[76px] w-full">
-        <div className="basis-0 content-stretch flex flex-col gap-4 grow items-start min-h-px min-w-px relative shrink-0">
-          <div className="content-stretch flex flex-col gap-2 items-start relative shrink-0 w-full">
-            <div className="content-stretch flex gap-1 items-center relative shrink-0 w-full">
-              <p className="basis-0 font-['Nunito',sans-serif] font-semibold grow leading-[28.8px] min-h-px min-w-px relative shrink-0 text-[#f7f7f7] text-2xl tracking-[0.24px]">
-                Wallets
-              </p>
-            </div>
-            <div className="content-stretch flex items-center relative shrink-0 w-full">
-              <p className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[25.6px] min-h-px min-w-px relative shrink-0 text-[#a2a2a2] text-base tracking-[0.024px]">
-                Manage and monitor all customer wallets across multiple
-                currencies.
-              </p>
-            </div>
+      <div className="bg-[#0a0a0a] flex gap-4 items-end p-6">
+        <div className="flex flex-col gap-4 flex-1">
+          <div className="flex flex-col gap-2">
+            <p className="font-['Nunito',sans-serif] font-semibold leading-[28.8px] text-[#f7f7f7] text-2xl tracking-[0.24px]">
+              Wallets
+            </p>
+            <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#a2a2a2] text-base tracking-[0.024px]">
+              Manage and monitor all customer wallets across multiple
+              currencies.
+            </p>
           </div>
         </div>
       </div>
 
       {/* Metrics Container */}
-      <div className="box-border content-stretch flex gap-6 items-center justify-center px-6 py-0 w-full mt-6">
+      <div className="grid grid-cols-4 gap-6 px-6">
         <MetricCard
           icon={walletsMetricIcon}
           iconBg="bg-[#00c7be]"
@@ -247,20 +239,16 @@ export default function Wallets() {
       </div>
 
       {/* All Wallets Table */}
-      <div className="box-border content-stretch flex flex-col gap-1 items-start px-6 py-0 relative shrink-0 w-full mt-6">
-        <div className="bg-[#181818] content-stretch flex flex-col items-start relative rounded-3xl shrink-0 w-full">
+      <div className="px-6 mt-6">
+        <div className="bg-[#181818] flex flex-col rounded-3xl">
           {/* Table Header */}
-          <div className="border-[#313131] border-b-[0.5px] border-solid box-border content-stretch flex gap-6 items-center p-4 relative shrink-0 w-full">
-            <p className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[25.6px] min-h-px min-w-px relative shrink-0 text-[#f7f7f7] text-base tracking-[0.024px]">
+          <div className="border-[#313131] border-b-[0.5px] border-solid flex items-center justify-between gap-6 p-4">
+            <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#f7f7f7] text-base tracking-[0.024px]">
               All Wallets
             </p>
-            <div className="basis-0 content-stretch flex flex-col grow h-[43px] items-start min-h-px min-w-px relative shrink-0">
-              <div className="basis-0 bg-[#181818] border-[#717171] border-[0.5px] border-solid box-border content-stretch flex gap-2 grow items-center min-h-px min-w-px p-4 relative rounded-xl shrink-0 w-full">
-                <svg
-                  className="relative shrink-0 size-5"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                >
+            <div className="flex-1 max-w-md">
+              <div className="bg-[#181818] border-[#717171] border-[0.5px] border-solid flex gap-2 items-center p-4 rounded-xl">
+                <svg className="size-5" viewBox="0 0 20 20" fill="none">
                   <path
                     d="M9.0625 15.625C12.6869 15.625 15.625 12.6869 15.625 9.0625C15.625 5.43813 12.6869 2.5 9.0625 2.5C5.43813 2.5 2.5 5.43813 2.5 9.0625C2.5 12.6869 5.43813 15.625 9.0625 15.625Z"
                     stroke="#717171"
@@ -281,12 +269,12 @@ export default function Wallets() {
                   placeholder="Search wallets..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="basis-0 bg-transparent font-['Nunito',sans-serif] font-normal grow h-full leading-[22.4px] min-h-px min-w-px outline-none relative shrink-0 text-sm text-[#a2a2a2] tracking-[-0.28px]"
+                  className="bg-transparent font-['Nunito',sans-serif] font-normal flex-1 leading-[22.4px] outline-none text-sm text-[#a2a2a2] tracking-[-0.28px]"
                 />
               </div>
             </div>
-            <div className="content-stretch flex gap-4 items-center relative shrink-0">
-              <button className="bg-[#494949] box-border content-stretch flex gap-2 items-center justify-center px-5 py-3 relative rounded-full shrink-0">
+            <div className="flex gap-4 items-center">
+              <button className="bg-[#494949] flex gap-2 items-center justify-center px-5 py-3 rounded-full">
                 <svg
                   className="relative shrink-0 size-4"
                   viewBox="0 0 16 16"
@@ -311,14 +299,10 @@ export default function Wallets() {
                     strokeLinecap="round"
                   />
                 </svg>
-                <p className="font-['Nunito',sans-serif] font-semibold leading-[14.4px] relative shrink-0 text-[#a2a2a2] text-xs tracking-[0.12px]">
+                <p className="font-['Nunito',sans-serif] font-semibold leading-[14.4px] text-[#a2a2a2] text-xs tracking-[0.12px]">
                   All Status
                 </p>
-                <svg
-                  className="relative shrink-0 size-4"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                >
+                <svg className="size-4" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M13.28 5.96667L8.93333 10.3133C8.42 10.8267 7.58 10.8267 7.06667 10.3133L2.72 5.96667"
                     stroke="#a2a2a2"
@@ -333,18 +317,18 @@ export default function Wallets() {
           </div>
 
           {/* Table */}
-          <div className="box-border content-stretch flex flex-col items-start p-2 relative shrink-0 w-full">
-            <div className="border-[#0a0a0a] border-[0.5px] border-solid relative rounded-2xl shrink-0 w-full">
-              <div className="content-stretch flex flex-col items-start overflow-clip relative rounded-inherit w-full">
+          <div className="flex flex-col p-2">
+            <div className="border-[#0a0a0a] border-[0.5px] border-solid rounded-2xl">
+              <div className="flex flex-col overflow-clip rounded-inherit">
                 {/* Table Header Row */}
-                <div className="content-stretch flex items-start overflow-clip relative shrink-0 w-full">
-                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center px-[26px] py-[23px] relative shrink-0 rounded-tl-2xl" />
-                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center px-4 py-3 relative shrink-0 w-[252px]">
-                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
+                <div className="flex items-start overflow-clip">
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-[26px] py-[23px] rounded-tl-2xl" />
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[252px]">
+                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm tracking-[-0.28px]">
                       Customer Name
                     </p>
                   </div>
-                  <div className="basis-0 bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center grow min-h-px min-w-px px-4 py-3 relative shrink-0">
+                  <div className="flex-1 bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3">
                     <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
                       Balance
                     </p>
@@ -355,16 +339,16 @@ export default function Wallets() {
                     </p>
                   </div>
                   <div className="basis-0 bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center grow min-h-px min-w-px px-4 py-3 relative shrink-0">
-                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
+                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm tracking-[-0.28px]">
                       Balance
                     </p>
                   </div>
-                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center px-4 py-3 relative shrink-0 w-[124px]">
-                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[124px]">
+                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm tracking-[-0.28px]">
                       Status
                     </p>
                   </div>
-                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center px-4 py-3 relative shrink-0 w-[164px]">
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[164px]">
                     <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
                       Date Created
                     </p>

@@ -1,5 +1,4 @@
 // Reusable Components
-import Header from "./layout/Header";
 import MetricCard from "./dashboard/MetricCard";
 import ActivityItem from "./dashboard/ActivityItem";
 
@@ -83,250 +82,240 @@ export default function Dashboard() {
   ];
 
   return (
-    <div
-      className="bg-neutral-950 relative size-full min-h-screen"
-      data-name="Dashboard"
-    >
-      {/* Header */}
-      <div className="absolute left-0 top-0 w-full">
-        <Header />
-      </div>
-
-      {/* Metrics Container */}
-      <div className="absolute box-border content-stretch flex gap-6 items-center justify-center left-0 px-6 py-0 top-[111px] w-full">
-        <MetricCard
-          icon={activeCustomersIcon}
-          iconBg="bg-[#97ab27]"
-          iconBorder="border-[#c8da5d]"
-          title="Active Customers"
-          value="1,247"
-          change="12%"
-          changeType="up"
-          changeText="Compared to last month"
-        />
-        <MetricCard
-          icon={walletsMetricIcon}
-          iconBg="bg-[#00c7be]"
-          iconBorder="border-[#00e2d8]"
-          title="Total Wallets"
-          value="3,456"
-          change="8%"
-          changeType="up"
-          changeText="Compared to last month"
-        />
-        <MetricCard
-          icon={transactionsIcon}
-          iconBg="bg-[#0040c1]"
-          iconBorder="border-[#004eeb]"
-          title="Transactions Today"
-          value="892"
-          change="5%"
-          changeType="down"
-          changeText="Compared to yesterday"
-        />
-        <MetricCard
-          icon={disputesIcon}
-          iconBg="bg-[#93370d]"
-          iconBorder="border-[#b54708]"
-          title="Pending Disputes"
-          value="1,247"
-        />
-        <MetricCard
-          icon={uptimeIcon}
-          iconBg="bg-[#085d3a]"
-          iconBorder="border-[#067647]"
-          title="API Uptime"
-          value="99.98%"
-        />
-      </div>
-
-      {/* Transaction Volume Chart */}
-      <div className="absolute bg-[#181818] h-[368px] left-6 overflow-hidden rounded-3xl top-[298.5px] w-[720px]">
-        <div className="border-[#313131] border-[0px_0px_0.5px] border-solid box-border content-stretch flex gap-1 items-center left-0 px-4 py-2 top-[0.5px] w-[720px]">
-          <p className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[25.6px] min-h-px min-w-px relative shrink-0 text-[#f7f7f7] text-base tracking-[0.024px]">
-            Transaction Volume
-          </p>
-        </div>
-        <div className="absolute left-4 top-16 w-[688px] h-[304px] flex items-center justify-center">
-          <img
-            alt="Transaction Chart"
-            className="max-w-full max-h-full"
-            src={transactionChart}
+    <div className="bg-neutral-950 min-h-screen w-full p-6" data-name="Dashboard">
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-2 gap-6 max-w-[1488px] mx-auto">
+        {/* Metrics Container - Spans full width */}
+        <div className="col-span-2 flex gap-6 items-center justify-center">
+          <MetricCard
+            icon={activeCustomersIcon}
+            iconBg="bg-[#97ab27]"
+            iconBorder="border-[#c8da5d]"
+            title="Active Customers"
+            value="1,247"
+            change="12%"
+            changeType="up"
+            changeText="Compared to last month"
+          />
+          <MetricCard
+            icon={walletsMetricIcon}
+            iconBg="bg-[#00c7be]"
+            iconBorder="border-[#00e2d8]"
+            title="Total Wallets"
+            value="3,456"
+            change="8%"
+            changeType="up"
+            changeText="Compared to last month"
+          />
+          <MetricCard
+            icon={transactionsIcon}
+            iconBg="bg-[#0040c1]"
+            iconBorder="border-[#004eeb]"
+            title="Transactions Today"
+            value="892"
+            change="5%"
+            changeType="down"
+            changeText="Compared to yesterday"
+          />
+          <MetricCard
+            icon={disputesIcon}
+            iconBg="bg-[#93370d]"
+            iconBorder="border-[#b54708]"
+            title="Pending Disputes"
+            value="1,247"
+          />
+          <MetricCard
+            icon={uptimeIcon}
+            iconBg="bg-[#085d3a]"
+            iconBorder="border-[#067647]"
+            title="API Uptime"
+            value="99.98%"
           />
         </div>
-      </div>
 
-      {/* Recent Activity Feed */}
-      <div className="absolute bg-[#181818] box-border content-stretch flex flex-col h-[659px] items-start left-[calc(50%+12px)] rounded-3xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.05)] top-[299px] w-[720px]">
-        <div className="border-[#313131] border-[0px_0px_0.5px] border-solid box-border content-stretch flex gap-1 items-center p-4 relative shrink-0 w-full">
-          <p className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[25.6px] min-h-px min-w-px relative shrink-0 text-[#f7f7f7] text-base tracking-[0.024px]">
-            Recent Activity
-          </p>
-        </div>
-        <div className="basis-0 box-border content-stretch flex flex-col grow items-start justify-between min-h-px min-w-px px-0 py-4 relative shrink-0 w-full">
-          {activityItems.map((item, index) => (
-            <ActivityItem
-              key={index}
-              icon={item.icon}
-              iconBg={item.iconBg}
-              title={item.title}
-              subtitle={item.subtitle}
-              time={item.time}
+        {/* Transaction Volume Chart - Left Column */}
+        <div className="bg-[#181818] rounded-3xl overflow-hidden flex flex-col">
+          <div className="border-[#313131] border-b-[0.5px] border-solid px-4 py-2">
+            <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#f7f7f7] text-base tracking-[0.024px]">
+              Transaction Volume
+            </p>
+          </div>
+          <div className="flex items-center justify-center p-4 h-[304px]">
+            <img
+              alt="Transaction Chart"
+              className="max-w-full max-h-full"
+              src={transactionChart}
             />
-          ))}
-        </div>
-      </div>
-
-      {/* Dispute Resolution Chart */}
-      <div className="absolute bg-[#181818] content-stretch flex flex-col h-[267px] items-start left-6 overflow-hidden rounded-3xl top-[691px] w-[348px]">
-        <div className="border-[#313131] border-[0px_0px_0.5px] border-solid box-border content-stretch flex gap-1 items-center px-4 py-2 relative shrink-0 w-full">
-          <p className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[25.6px] min-h-px min-w-px relative shrink-0 text-[#f7f7f7] text-base tracking-[0.024px]">
-            Dispute Resolution
-          </p>
+          </div>
         </div>
 
-        {/* Bar Chart Area */}
-        <div className="basis-0 grow min-h-px min-w-px overflow-hidden relative shrink-0 w-full p-4">
-          {/* Simplified Bar Chart */}
-          <div className="flex items-end justify-between h-32 px-4">
-            {[
-              { resolved: 80, pending: 41 },
-              { resolved: 122, pending: 13 },
-              { resolved: 93, pending: 85 },
-              { resolved: 36, pending: 5 },
-              { resolved: 130, pending: 25 },
-              { resolved: 89, pending: 66 },
-              { resolved: 17, pending: 28 },
-            ].map((bar, index) => (
-              <div key={index} className="flex flex-col items-center gap-1 w-8">
-                <div className="flex gap-1 items-end h-full">
-                  <div
-                    className="bg-[#079455] rounded-t-2xl w-3"
-                    style={{ height: `${(bar.resolved / 150) * 100}%` }}
+        {/* Recent Activity Feed - Right Column, spans 2 rows */}
+        <div className="bg-[#181818] rounded-3xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.05)] flex flex-col row-span-2">
+          <div className="border-[#313131] border-b-[0.5px] border-solid p-4 shrink-0">
+            <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#f7f7f7] text-base tracking-[0.024px]">
+              Recent Activity
+            </p>
+          </div>
+          <div className="flex flex-col justify-between py-4 flex-1 overflow-y-auto">
+            {activityItems.map((item, index) => (
+              <ActivityItem
+                key={index}
+                icon={item.icon}
+                iconBg={item.iconBg}
+                title={item.title}
+                subtitle={item.subtitle}
+                time={item.time}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom row with two charts - Left Column */}
+        <div className="flex gap-6">
+          {/* Dispute Resolution Chart */}
+          <div className="bg-[#181818] rounded-3xl overflow-hidden flex flex-col flex-1">
+            <div className="border-[#313131] border-b-[0.5px] border-solid px-4 py-2 shrink-0">
+              <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#f7f7f7] text-base tracking-[0.024px]">
+                Dispute Resolution
+              </p>
+            </div>
+
+            {/* Bar Chart Area */}
+            <div className="flex-1 overflow-hidden p-4">
+              {/* Simplified Bar Chart */}
+              <div className="flex items-end justify-between h-32 px-4">
+                {[
+                  { resolved: 80, pending: 41 },
+                  { resolved: 122, pending: 13 },
+                  { resolved: 93, pending: 85 },
+                  { resolved: 36, pending: 5 },
+                  { resolved: 130, pending: 25 },
+                  { resolved: 89, pending: 66 },
+                  { resolved: 17, pending: 28 },
+                ].map((bar, index) => (
+                  <div key={index} className="flex flex-col items-center gap-1 w-8">
+                    <div className="flex gap-1 items-end h-full">
+                      <div
+                        className="bg-[#079455] rounded-t-2xl w-3"
+                        style={{ height: `${(bar.resolved / 150) * 100}%` }}
+                      />
+                      <div
+                        className="bg-[#dc6803] rounded-t-2xl w-3"
+                        style={{ height: `${(bar.pending / 150) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Week Labels */}
+              <div className="flex justify-between px-4 mt-2">
+                {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
+                  <p
+                    key={day}
+                    className="font-['Nunito',sans-serif] font-medium text-[#494949] text-[10px] text-center tracking-[0.5px] uppercase"
+                  >
+                    {day}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="border-[#313131] border-t-[0.5px] border-solid flex gap-8 items-center justify-center px-4 py-2 shrink-0">
+              <div className="flex gap-1 items-center">
+                <div className="size-2">
+                  <img
+                    alt="Pending"
+                    className="block max-w-none size-full"
+                    src={pendingLegendIcon}
                   />
-                  <div
-                    className="bg-[#dc6803] rounded-t-2xl w-3"
-                    style={{ height: `${(bar.pending / 150) * 100}%` }}
+                </div>
+                <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#dc6803] text-xs text-center text-nowrap tracking-[0.48px] whitespace-pre">
+                  Pending
+                </p>
+              </div>
+              <div className="flex gap-1 items-center">
+                <div className="size-2">
+                  <img
+                    alt="Resolved"
+                    className="block max-w-none size-full"
+                    src={resolvedLegendIcon}
+                  />
+                </div>
+                <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#079455] text-xs text-center text-nowrap tracking-[0.48px] whitespace-pre">
+                  Resolved
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Currencies Pie Chart */}
+          <div className="bg-[#181818] rounded-3xl overflow-hidden flex flex-col flex-1">
+            <div className="border-[#313131] border-b-[0.5px] border-solid px-4 py-2 shrink-0">
+              <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#f7f7f7] text-base tracking-[0.024px]">
+                Top Currencies
+              </p>
+            </div>
+            <div className="flex gap-9 items-center justify-center overflow-hidden p-4 flex-1">
+              <div className="flex items-center justify-center py-[22px]">
+                <div className="size-[150px]">
+                  <img
+                    alt="Pie Chart"
+                    className="block max-w-none size-full"
+                    src={pieChart}
                   />
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Week Labels */}
-          <div className="flex justify-between px-4 mt-2">
-            {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
-              <p
-                key={day}
-                className="font-['Nunito',sans-serif] font-medium text-[#494949] text-[10px] text-center tracking-[0.5px] uppercase"
-              >
-                {day}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="border-[#313131] border-[0px_0px_0.5px] border-solid box-border content-stretch flex gap-8 items-center justify-center px-4 py-2 relative shrink-0 w-full">
-          <div className="content-stretch flex gap-1 items-center relative shrink-0">
-            <div className="relative shrink-0 size-2">
-              <img
-                alt="Pending"
-                className="block max-w-none size-full"
-                src={pendingLegendIcon}
-              />
-            </div>
-            <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] relative shrink-0 text-[#dc6803] text-xs text-center text-nowrap tracking-[0.48px] whitespace-pre">
-              Pending
-            </p>
-          </div>
-          <div className="content-stretch flex gap-1 items-center relative shrink-0">
-            <div className="relative shrink-0 size-2">
-              <img
-                alt="Resolved"
-                className="block max-w-none size-full"
-                src={resolvedLegendIcon}
-              />
-            </div>
-            <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] relative shrink-0 text-[#079455] text-xs text-center text-nowrap tracking-[0.48px] whitespace-pre">
-              Resolved
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Top Currencies Pie Chart */}
-      <div className="absolute bg-[#181818] content-stretch flex flex-col h-[267px] items-start left-[calc(25%+18px)] overflow-hidden rounded-3xl top-[691px] w-[348px]">
-        <div className="border-[#313131] border-[0px_0px_0.5px] border-solid box-border content-stretch flex gap-1 items-center px-4 py-2 relative shrink-0 w-full">
-          <p className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[25.6px] min-h-px min-w-px relative shrink-0 text-[#f7f7f7] text-base tracking-[0.024px]">
-            Top Currencies
-          </p>
-        </div>
-        <div className="basis-0 box-border content-stretch flex gap-9 grow items-center justify-center min-h-px min-w-px overflow-hidden p-4 relative shrink-0 w-full">
-          <div className="box-border content-stretch flex gap-1 h-full items-center justify-center px-0 py-[22px] relative shrink-0 w-[166px]">
-            <div className="relative shrink-0 size-[150px]">
-              <img
-                alt="Pie Chart"
-                className="block max-w-none size-full"
-                src={pieChart}
-              />
-            </div>
-          </div>
-          <div className="basis-0 content-stretch flex flex-col gap-3 grow h-full items-center justify-center min-h-px min-w-px overflow-hidden relative shrink-0">
-            <div className="content-stretch flex gap-1 items-center relative shrink-0 w-full">
-              <div className="relative shrink-0 size-2">
-                <img
-                  alt="EUR"
-                  className="block max-w-none size-full"
-                  src={eurLegendIcon}
-                />
-              </div>
-              <div className="basis-0 content-stretch flex grow h-[21.714px] items-center min-h-px min-w-px relative shrink-0">
-                <p className="basis-0 font-['Nunito',sans-serif] font-medium grow leading-[19.2px] min-h-px min-w-px relative shrink-0 text-[#ff2d55] text-xs tracking-[0.48px]">
-                  EUR (10%)
-                </p>
-              </div>
-            </div>
-            <div className="content-stretch flex gap-1 items-center relative shrink-0 w-full">
-              <div className="relative shrink-0 size-2">
-                <img
-                  alt="GBP"
-                  className="block max-w-none size-full"
-                  src={gbpLegnedIcon}
-                />
-              </div>
-              <div className="basis-0 content-stretch flex grow h-[21.714px] items-center min-h-px min-w-px relative shrink-0">
-                <p className="basis-0 font-['Nunito',sans-serif] font-medium grow leading-[19.2px] min-h-px min-w-px relative shrink-0 text-[#2970ff] text-xs tracking-[0.48px]">
-                  GBP (15%)
-                </p>
-              </div>
-            </div>
-            <div className="content-stretch flex gap-1 items-center relative shrink-0 w-full">
-              <div className="relative shrink-0 size-2">
-                <img
-                  alt="NGN"
-                  className="block max-w-none size-full"
-                  src={ngnLegendIcon}
-                />
-              </div>
-              <div className="basis-0 content-stretch flex grow h-[21.714px] items-center min-h-px min-w-px relative shrink-0">
-                <p className="basis-0 font-['Nunito',sans-serif] font-medium grow leading-[19.2px] min-h-px min-w-px relative shrink-0 text-[#bad133] text-xs tracking-[0.48px]">
-                  NGN (45%)
-                </p>
-              </div>
-            </div>
-            <div className="content-stretch flex gap-1 items-center relative shrink-0 w-full">
-              <div className="relative shrink-0 size-2">
-                <img
-                  alt="USD"
-                  className="block max-w-none size-full"
-                  src={usdLegendIcon}
-                />
-              </div>
-              <div className="basis-0 content-stretch flex grow h-[21.714px] items-center min-h-px min-w-px relative shrink-0">
-                <p className="basis-0 font-['Nunito',sans-serif] font-medium grow leading-[19.2px] min-h-px min-w-px relative shrink-0 text-[#17b26a] text-xs tracking-[0.48px]">
-                  USD (30%)
-                </p>
+              <div className="flex flex-col gap-3 justify-center">
+                <div className="flex gap-1 items-center">
+                  <div className="size-2">
+                    <img
+                      alt="EUR"
+                      className="block max-w-none size-full"
+                      src={eurLegendIcon}
+                    />
+                  </div>
+                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#ff2d55] text-xs tracking-[0.48px]">
+                    EUR (10%)
+                  </p>
+                </div>
+                <div className="flex gap-1 items-center">
+                  <div className="size-2">
+                    <img
+                      alt="GBP"
+                      className="block max-w-none size-full"
+                      src={gbpLegnedIcon}
+                    />
+                  </div>
+                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#2970ff] text-xs tracking-[0.48px]">
+                    GBP (15%)
+                  </p>
+                </div>
+                <div className="flex gap-1 items-center">
+                  <div className="size-2">
+                    <img
+                      alt="NGN"
+                      className="block max-w-none size-full"
+                      src={ngnLegendIcon}
+                    />
+                  </div>
+                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#bad133] text-xs tracking-[0.48px]">
+                    NGN (45%)
+                  </p>
+                </div>
+                <div className="flex gap-1 items-center">
+                  <div className="size-2">
+                    <img
+                      alt="USD"
+                      className="block max-w-none size-full"
+                      src={usdLegendIcon}
+                    />
+                  </div>
+                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#17b26a] text-xs tracking-[0.48px]">
+                    USD (30%)
+                  </p>
+                </div>
               </div>
             </div>
           </div>

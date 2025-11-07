@@ -23,7 +23,7 @@ export default function MetricCard({
   changeText,
 }: MetricCardProps) {
   return (
-    <div className="basis-0 bg-[#181818] box-border content-stretch flex flex-col gap-8 grow h-full items-start min-h-px min-w-px p-4 relative rounded-3xl shrink-0">
+    <div className="basis-0 bg-[#181818] box-border content-stretch flex flex-col gap-2 grow h-full items-start min-h-px min-w-px p-4 relative rounded-3xl shrink-0">
       <div className="relative shrink-0 w-full">
         <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-2 items-center relative w-full">
           <div
