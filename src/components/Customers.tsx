@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import flagEUR from "../assets/icons/flags/EUR.svg";
 import MetricCard from "./dashboard/MetricCard";
 import exportIcon from "../assets/icons/export-icon.svg";
@@ -274,8 +274,9 @@ export default function Customers() {
                       </div>
                       <button
                         onClick={() =>
-                          navigate(`/customers/${i + 1}`, {
-                            state: { ...r, customerId: String(i + 1) },
+                          navigate({
+                            to: `/customers/${i + 1}` as any,
+                            state: { ...r, customerId: String(i + 1) } as any,
                           })
                         }
                         className="border-r-[0.5px] border-[var(--colors\/grey\/1000,#0a0a0a)] flex items-center min-h-10 px-4 py-2 w-[252px] text-left hover:bg-[rgba(10,10,10,0.2)] transition-colors"
@@ -324,8 +325,9 @@ export default function Customers() {
                       <button
                         aria-label="View customer"
                         onClick={() =>
-                          navigate(`/customers/${i + 1}`, {
-                            state: { ...r, customerId: String(i + 1) },
+                          navigate({
+                            to: `/customers/${i + 1}` as any,
+                            state: { ...r, customerId: String(i + 1) } as any,
                           })
                         }
                         className="flex items-center justify-center min-h-10 px-4 py-2 w-[80px] hover:bg-[rgba(10,10,10,0.2)] transition-colors"

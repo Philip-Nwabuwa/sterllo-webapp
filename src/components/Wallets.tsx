@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 
 // Reusable Components
 import MetricCard from "./dashboard/MetricCard";
@@ -386,7 +386,7 @@ export default function Wallets() {
                         </div>
                         <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[252px]">
                           <p
-                            onClick={() => navigate(`/wallets/${wallet.id}`)}
+                            onClick={() => navigate({ to: `/wallets/${wallet.id}` })}
                             className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[22.4px] min-h-px min-w-px overflow-ellipsis overflow-hidden relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px] cursor-pointer hover:text-[#f7f7f7] transition-colors"
                           >
                             {wallet.customerName}

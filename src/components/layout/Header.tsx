@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 import Logo from "../common/Logo";
 import UserContainer from "../common/UserContainer";
 import Navbar, { type NavItem } from "./Navbar";
@@ -20,7 +20,7 @@ export default function Header({
 
   const handleLogout = () => {
     // TODO: Clear authentication state/tokens
-    navigate("/login");
+    navigate({ to: "/login" });
   };
 
   const baseClasses = variant === "bordered"

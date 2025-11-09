@@ -1,4 +1,5 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "@tanstack/react-router";
+import { Route } from "@/routes/_authenticated/customers.$id";
 
 import avatarImage from "../assets/images/avatar.png";
 import penIcon from "../assets/icons/pen-icon.svg";
@@ -18,7 +19,8 @@ type CustomerRow = {
 
 export default function CustomerDetail() {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const params = Route.useParams();
+  const id = params.id;
   const location = useLocation();
   const state = (location.state || {}) as Partial<CustomerRow> & {
     customerId?: string;
@@ -47,7 +49,7 @@ export default function CustomerDetail() {
             Customer not found
           </p>
           <button
-            onClick={() => navigate("/customers")}
+            onClick={() => navigate({ to: "/customers" })}
             className="bg-[#bad133] box-border content-stretch flex gap-2 items-center justify-center px-5 py-3 rounded-full"
           >
             <p className="font-['Nunito',sans-serif] font-normal leading-[16.8px] text-[#121505] text-sm">
@@ -70,7 +72,7 @@ export default function CustomerDetail() {
           {/* Breadcrumb */}
           <div className="bg-[#181818] border-[#313131] border-[0.5px] border-solid flex gap-3 items-center px-4 py-1 rounded-full w-fit">
             <button
-              onClick={() => navigate("/customers")}
+              onClick={() => navigate({ to: "/customers" })}
               className="size-5 cursor-pointer"
             >
               <svg viewBox="0 0 20 20" fill="none" className="size-full">

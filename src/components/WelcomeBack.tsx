@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 
 // Zod schema for form validation
 const loginSchema = z.object({
@@ -55,7 +55,7 @@ export default function WelcomeBack() {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
 
       // Navigate to dashboard after successful login
-      navigate("/dashboard");
+      navigate({ to: "/dashboard" });
     } catch (error) {
       console.error("Login error:", error);
     }

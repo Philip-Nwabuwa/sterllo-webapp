@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import NavLink from "./NavLink";
 
 // Navigation Icons
@@ -47,7 +47,7 @@ export default function Navbar({ className, customNavItems }: NavbarProps) {
           label={item.label}
           isActive={location.pathname === item.path}
           hasDropdown={item.hasDropdown}
-          onClick={() => navigate(item.path)}
+          onClick={() => navigate({ to: item.path as any })}
         />
       ))}
     </div>

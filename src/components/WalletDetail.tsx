@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
+import { Route } from "@/routes/_authenticated/wallets.$id";
 import ReceiptModal, { type ReceiptData } from "./ReceiptModal";
 
 import BankIcon from "../assets/icons/bank.svg";
@@ -514,7 +515,8 @@ function getStatusStyles(status: TransactionStatus) {
 }
 
 export default function WalletDetail() {
-  const { id } = useParams<{ id: string }>();
+  const params = Route.useParams();
+  const id = params.id;
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<
     "transfers" | "withdrawals" | "deposits" | "swaps"
@@ -536,7 +538,7 @@ export default function WalletDetail() {
             Wallet not found
           </p>
           <button
-            onClick={() => navigate("/wallets")}
+            onClick={() => navigate({ to: "/wallets" })}
             className="bg-[#bad133] box-border content-stretch flex gap-2 items-center justify-center px-5 py-3 rounded-full"
           >
             <p className="font-['Nunito',sans-serif] font-normal leading-[16.8px] text-[#121505] text-sm">
@@ -556,7 +558,7 @@ export default function WalletDetail() {
           {/* Breadcrumb */}
           <div className="bg-[#181818] border-[#313131] border-[0.5px] border-solid flex gap-3 items-center px-4 py-1 rounded-full w-fit">
             <button
-              onClick={() => navigate("/wallets")}
+              onClick={() => navigate({ to: "/wallets" })}
               className="size-5 cursor-pointer"
             >
               <svg viewBox="0 0 20 20" fill="none" className="size-full">
