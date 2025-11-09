@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 
 // Reusable Components
 import MetricCard from "./dashboard/MetricCard";
@@ -36,128 +37,19 @@ interface WalletData {
   lastActivity: string;
 }
 
-const walletData: WalletData[] = [
-  {
-    id: 1,
-    customerName: "Tunde Afolabi",
-    flag: flagEUR,
-    currency: "€",
-    balance1: "300,750.00",
-    balance2: "300,750.00",
-    balance3: "300,750.00",
-    status: "Active",
-    dateCreated: "2024-10-02",
-    lastActivity: "3 hours ago",
-  },
-  {
-    id: 2,
-    customerName: "Femi Ogunleye",
-    flag: flagGHA,
-    currency: "GH₵",
-    balance1: "55,400.00",
-    balance2: "55,400.00",
-    balance3: "55,400.00",
-    status: "Active",
-    dateCreated: "2024-09-30",
-    lastActivity: "3 hours ago",
-  },
-  {
-    id: 3,
-    customerName: "Zainab Ibrahim",
-    flag: flagCHE,
-    currency: "CHf",
-    balance1: "200,250.00",
-    balance2: "200,250.00",
-    balance3: "200,250.00",
-    status: "Suspended",
-    dateCreated: "2024-09-27",
-    lastActivity: "9 hours ago",
-  },
-  {
-    id: 4,
-    customerName: "Ijeoma Okeke",
-    flag: flagGBR,
-    currency: "£",
-    balance1: "45,000.00",
-    balance2: "45,000.00",
-    balance3: "45,000.00",
-    status: "Active",
-    dateCreated: "2024-09-30",
-    lastActivity: "5 hours ago",
-  },
-  {
-    id: 5,
-    customerName: "Adaobi Eze",
-    flag: flagUGA,
-    currency: "USh",
-    balance1: "130,000.00",
-    balance2: "130,000.00",
-    balance3: "130,000.00",
-    status: "Active",
-    dateCreated: "2024-10-01",
-    lastActivity: "1 hour ago",
-  },
-  {
-    id: 6,
-    customerName: "Olumide Bakare",
-    flag: flagCAN,
-    currency: "C$",
-    balance1: "78,900.00",
-    balance2: "78,900.00",
-    balance3: "78,900.00",
-    status: "Inactive",
-    dateCreated: "2024-10-03",
-    lastActivity: "4 hours ago",
-  },
-  {
-    id: 7,
-    customerName: "Bola Johnson",
-    flag: flagAUS,
-    currency: "A$",
-    balance1: "150,600.00",
-    balance2: "150,600.00",
-    balance3: "150,600.00",
-    status: "Active",
-    dateCreated: "2024-10-04",
-    lastActivity: "8 hours ago",
-  },
-  {
-    id: 8,
-    customerName: "Emeka Uche",
-    flag: flagJPN,
-    currency: "¥",
-    balance1: "90,000.00",
-    balance2: "90,000.00",
-    balance3: "90,000.00",
-    status: "Active",
-    dateCreated: "2024-09-29",
-    lastActivity: "7 hours ago",
-  },
-  {
-    id: 9,
-    customerName: "Jide Ojo",
-    flag: flagRWA,
-    currency: "RF",
-    balance1: "99,999.00",
-    balance2: "99,999.00",
-    balance3: "99,999.00",
-    status: "Active",
-    dateCreated: "2024-09-29",
-    lastActivity: "5 hours ago",
-  },
-  {
-    id: 10,
-    customerName: "Kamari Okoro",
-    flag: flagUSA,
-    currency: "$",
-    balance1: "99,999.00",
-    balance2: "99,999.00",
-    balance3: "99,999.00",
-    status: "Active",
-    dateCreated: "2024-09-29",
-    lastActivity: "5 hours ago",
-  },
-];
+// Flag mapping for currencies
+const currencyFlagMap: Record<string, string> = {
+  EUR: flagEUR,
+  GHS: flagGHA,
+  CHF: flagCHE,
+  GBP: flagGBR,
+  UGX: flagUGA,
+  CAD: flagCAN,
+  AUD: flagAUS,
+  JPY: flagJPN,
+  RWF: flagRWA,
+  USD: flagUSA,
+};
 
 function getStatusStyles(status: WalletStatus) {
   switch (status) {
@@ -186,6 +78,55 @@ export default function Wallets() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["wallets"],
+    queryFn: async () => {
+      const response = await fetch("/api/wallets/");
+      if (!response.ok) {
+        throw new Error("Failed to fetch wallets");
+      }
+      return response.json();
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
+        <div className="text-[#f7f7f7] text-xl font-['Nunito',sans-serif]">
+          Loading wallets...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
+        <div className="text-red-400 text-xl font-['Nunito',sans-serif]">
+          Error loading wallets: {error.message}
+        </div>
+      </div>
+    );
+  }
+
+  const wallets = data?.data || [];
+  const metrics = data?.metrics || {};
+  const total = data?.total || 0;
+
+  // Map API data to component format
+  const walletData: WalletData[] = wallets.map((wallet: any) => ({
+    id: wallet.id,
+    customerName: wallet.customerName,
+    flag: currencyFlagMap[wallet.currency] || flagEUR,
+    currency: wallet.currencySymbol,
+    balance1: wallet.balance1,
+    balance2: wallet.balance2,
+    balance3: wallet.balance3,
+    status: wallet.status as WalletStatus,
+    dateCreated: wallet.dateCreated,
+    lastActivity: wallet.lastActivity,
+  }));
+
   return (
     <div
       className="bg-neutral-950 relative size-full min-h-screen pb-10"
@@ -213,7 +154,7 @@ export default function Wallets() {
           iconBg="bg-[#00c7be]"
           iconBorder="border-[#00e2d8]"
           title="Total Wallets"
-          value="127"
+          value={String(metrics.totalWallets || total)}
         />
         <MetricCard
           icon={transactionsIcon}
@@ -227,14 +168,14 @@ export default function Wallets() {
           iconBg="bg-[#085d3a]"
           iconBorder="border-[#067647]"
           title="Active Wallets"
-          value="109"
+          value={String(walletData.filter(w => w.status === "Active").length)}
         />
         <MetricCard
           icon={walletsMetricIcon}
           iconBg="bg-[#93370d]"
           iconBorder="border-[#b54708]"
           title="Pending Transactions"
-          value="12"
+          value={metrics.totalTransactions || "0"}
         />
       </div>
 
@@ -467,7 +408,7 @@ export default function Wallets() {
                 <div className="box-border content-stretch flex gap-6 items-center px-0 py-2 relative shrink-0 w-full">
                   <div className="basis-0 box-border content-stretch flex grow items-center min-h-px min-w-px px-4 py-3 relative shrink-0">
                     <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] relative shrink-0 text-[#494949] text-xs tracking-[0.48px]">
-                      Showing 10 of 127 Wallets
+                      Showing {walletData.length} of {total} Wallets
                     </p>
                   </div>
                   <div className="box-border content-stretch flex gap-4 items-center justify-end px-4 py-0 relative shrink-0 w-[277px]">

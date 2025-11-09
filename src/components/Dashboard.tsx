@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+
 // Reusable Components
 import MetricCard from "./dashboard/MetricCard";
 import ActivityItem from "./dashboard/ActivityItem";
@@ -28,61 +30,66 @@ import gbpLegnedIcon from "../assets/icons/gbp-legend-icon.svg";
 import ngnLegendIcon from "../assets/icons/ngn-legend-icon.svg";
 import usdLegendIcon from "../assets/icons/usd-legend-icon.svg";
 
+// Activity icon mapping
+const activityIconMap: Record<string, { icon: string; iconBg: string }> = {
+  wallet: { icon: walletActivityIcon, iconBg: "bg-[#f4f8aa]" },
+  dispute_resolved: { icon: disputeActivityIcon, iconBg: "bg-emerald-100" },
+  transfer: { icon: transferActivityIcon, iconBg: "bg-[#e3f2fd]" },
+  customer: { icon: customerActivityIcon, iconBg: "bg-[#e3f2fd]" },
+  dispute_filed: { icon: disputeRedActivityIcon, iconBg: "bg-[#fbe2e2]" },
+};
+
 export default function Dashboard() {
-  const activityItems = [
-    {
-      icon: walletActivityIcon,
-      iconBg: "bg-[#f4f8aa]",
-      title: "Wallet #3456 created",
-      subtitle: "by AdminUser",
-      time: "2 mins ago",
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["dashboardMetrics"],
+    queryFn: async () => {
+      const response = await fetch("/api/dashboard/metrics");
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard metrics");
+      }
+      return response.json();
     },
-    {
-      icon: disputeActivityIcon,
-      iconBg: "bg-emerald-100",
-      title: "Dispute #789 resolved successfully",
-      subtitle: "by Support Team",
-      time: "15 mins ago",
-    },
-    {
-      icon: transferActivityIcon,
-      iconBg: "bg-[#e3f2fd]",
-      title: "Transfer of ₦50,000 processed",
-      subtitle: "by System",
-      time: "23 mins ago",
-    },
-    {
-      icon: customerActivityIcon,
-      iconBg: "bg-[#e3f2fd]",
-      title: "New customer onboarded",
-      subtitle: "by Sales Team",
-      time: "1 hour ago",
-    },
-    {
-      icon: disputeRedActivityIcon,
-      iconBg: "bg-[#fbe2e2]",
-      title: "New dispute filed for transaction #1234",
-      subtitle: "by Customer Support",
-      time: "2 hours ago",
-    },
-    {
-      icon: disputeActivityIcon,
-      iconBg: "bg-emerald-100",
-      title: "API integration test passed",
-      subtitle: "by DevOps",
-      time: "4 hours ago",
-    },
-    {
-      icon: walletActivityIcon,
-      iconBg: "bg-[#f4f8aa]",
-      title: "Wallet #3445 balance updated",
-      subtitle: "by System",
-      time: "5 hours ago",
-    },
-  ];
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-neutral-950 min-h-screen w-full p-6 flex items-center justify-center">
+        <div className="text-[#f7f7f7] text-xl font-['Nunito',sans-serif]">
+          Loading dashboard...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-neutral-950 min-h-screen w-full p-6 flex items-center justify-center">
+        <div className="text-red-400 text-xl font-['Nunito',sans-serif]">
+          Error loading dashboard: {error.message}
+        </div>
+      </div>
+    );
+  }
+
+  const metrics = data?.data?.metrics || {};
+  const activityItems = (data?.data?.recentActivity || []).map(
+    (activity: any) => {
+      const iconData = activityIconMap[activity.type] || activityIconMap.wallet;
+      return {
+        icon: iconData.icon,
+        iconBg: iconData.iconBg,
+        title: activity.title,
+        subtitle: activity.subtitle,
+        time: activity.time,
+      };
+    }
+  );
 
   return (
-    <div className="bg-neutral-950 min-h-screen w-full p-6" data-name="Dashboard">
+    <div
+      className="bg-neutral-950 min-h-screen w-full p-6"
+      data-name="Dashboard"
+    >
       {/* Main Grid Layout */}
       <div className="grid grid-cols-2 gap-6 max-w-[1488px] mx-auto">
         {/* Metrics Container - Spans full width */}
@@ -92,44 +99,44 @@ export default function Dashboard() {
             iconBg="bg-[#97ab27]"
             iconBorder="border-[#c8da5d]"
             title="Active Customers"
-            value="1,247"
-            change="12%"
-            changeType="up"
-            changeText="Compared to last month"
+            value={metrics.activeCustomers?.value || "0"}
+            change={metrics.activeCustomers?.change}
+            changeType={metrics.activeCustomers?.changeType as "up" | "down"}
+            changeText={metrics.activeCustomers?.changeText}
           />
           <MetricCard
             icon={walletsMetricIcon}
             iconBg="bg-[#00c7be]"
             iconBorder="border-[#00e2d8]"
             title="Total Wallets"
-            value="3,456"
-            change="8%"
-            changeType="up"
-            changeText="Compared to last month"
+            value={metrics.totalWallets?.value || "0"}
+            change={metrics.totalWallets?.change}
+            changeType={metrics.totalWallets?.changeType as "up" | "down"}
+            changeText={metrics.totalWallets?.changeText}
           />
           <MetricCard
             icon={transactionsIcon}
             iconBg="bg-[#0040c1]"
             iconBorder="border-[#004eeb]"
             title="Transactions Today"
-            value="892"
-            change="5%"
-            changeType="down"
-            changeText="Compared to yesterday"
+            value={metrics.transactionsToday?.value || "0"}
+            change={metrics.transactionsToday?.change}
+            changeType={metrics.transactionsToday?.changeType as "up" | "down"}
+            changeText={metrics.transactionsToday?.changeText}
           />
           <MetricCard
             icon={disputesIcon}
             iconBg="bg-[#93370d]"
             iconBorder="border-[#b54708]"
             title="Pending Disputes"
-            value="1,247"
+            value={metrics.pendingDisputes?.value || "0"}
           />
           <MetricCard
             icon={uptimeIcon}
             iconBg="bg-[#085d3a]"
             iconBorder="border-[#067647]"
             title="API Uptime"
-            value="99.98%"
+            value={metrics.apiUptime?.value || "0%"}
           />
         </div>
 
@@ -157,7 +164,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex flex-col justify-between py-4 flex-1 overflow-y-auto">
-            {activityItems.map((item, index) => (
+            {activityItems.map((item: any, index: number) => (
               <ActivityItem
                 key={index}
                 icon={item.icon}
@@ -193,7 +200,10 @@ export default function Dashboard() {
                   { resolved: 89, pending: 66 },
                   { resolved: 17, pending: 28 },
                 ].map((bar, index) => (
-                  <div key={index} className="flex flex-col items-center gap-1 w-8">
+                  <div
+                    key={index}
+                    className="flex flex-col items-center gap-1 w-8"
+                  >
                     <div className="flex gap-1 items-end h-full">
                       <div
                         className="bg-[#079455] rounded-t-2xl w-3"
@@ -210,14 +220,16 @@ export default function Dashboard() {
 
               {/* Week Labels */}
               <div className="flex justify-between px-4 mt-2">
-                {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
-                  <p
-                    key={day}
-                    className="font-['Nunito',sans-serif] font-medium text-[#494949] text-[10px] text-center tracking-[0.5px] uppercase"
-                  >
-                    {day}
-                  </p>
-                ))}
+                {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map(
+                  (day) => (
+                    <p
+                      key={day}
+                      className="font-['Nunito',sans-serif] font-medium text-[#494949] text-[10px] text-center tracking-[0.5px] uppercase"
+                    >
+                      {day}
+                    </p>
+                  )
+                )}
               </div>
             </div>
 

@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
 
 // Zod schema for form validation
 const loginSchema = z.object({
@@ -42,23 +43,49 @@ export default function WelcomeBack() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
+    setError,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: "onBlur",
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      console.log("Login data:", data);
-      // TODO: Implement actual login logic
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginFormData) => {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Login failed");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log("Login successful:", data);
+      // Store token if needed
+      if (data.token) {
+        localStorage.setItem("authToken", data.token);
+      }
       // Navigate to dashboard after successful login
       navigate({ to: "/dashboard" });
-    } catch (error) {
+    },
+    onError: (error: Error) => {
       console.error("Login error:", error);
-    }
+      setError("root", {
+        message: error.message || "Login failed. Please try again.",
+      });
+    },
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    loginMutation.mutate(data);
   };
 
   const handleForgotPassword = () => {
@@ -158,6 +185,15 @@ export default function WelcomeBack() {
             className="content-stretch flex flex-col gap-4 items-start relative shrink-0 w-full"
             data-name="InputFields"
           >
+            {/* Error Message */}
+            {errors.root && (
+              <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 w-full">
+                <p className="text-red-400 text-sm font-['Nunito',sans-serif]">
+                  {errors.root.message}
+                </p>
+              </div>
+            )}
+
             {/* Email/Username Field */}
             <div
               className="content-stretch flex flex-col items-start relative shrink-0 w-full"
@@ -258,7 +294,7 @@ export default function WelcomeBack() {
           {/* Login Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={loginMutation.isPending}
             className="bg-[#D3F60B] border-[#97ab27] border-[0.5px] border-solid relative rounded-full shrink-0 w-full hover:bg-[#a5bc2e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             data-name="LoginButton"
           >
@@ -268,7 +304,7 @@ export default function WelcomeBack() {
                 data-name="TextContainer"
               >
                 <p className="font-['Nunito',sans-serif] font-semibold leading-[21.6px] relative shrink-0 text-[#262b0a] text-lg text-nowrap tracking-[0.18px] whitespace-pre">
-                  {isSubmitting ? "Logging in..." : "Login"}
+                  {loginMutation.isPending ? "Logging in..." : "Login"}
                 </p>
               </div>
             </div>

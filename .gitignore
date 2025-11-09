@@ -17,8 +17,11 @@ dist-ssr
 .env.local
 .env.*.local
 
-# TanStack Router
-src/routeTree.gen.ts
+# TanStack Router & Start
+app/routeTree.gen.ts
+.vinxi
+.output
+app.config.timestamp_*.js
 
 # Editor directories and files
 .vscode/*

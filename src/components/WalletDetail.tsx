@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Route } from "@/routes/_authenticated/wallets.$id";
 import ReceiptModal, { type ReceiptData } from "./ReceiptModal";
 
@@ -21,8 +22,23 @@ import flagRWA from "../assets/icons/flags/RWA.svg";
 import flagUSA from "../assets/icons/flags/USA.svg";
 import flagNGN from "../assets/icons/flags/NGN.svg";
 
-// Mock wallet data (in a real app this would come from an API)
-const walletDetailsData: Record<
+// Flag mapping for currencies
+const currencyFlagMap: Record<string, string> = {
+  NGN: flagNGN,
+  GBP: flagGBR,
+  USD: flagUSA,
+  EUR: flagEUR,
+  CAD: flagCAN,
+  GHS: flagGHA,
+  CHF: flagCHE,
+  UGX: flagUGA,
+  AUD: flagAUS,
+  JPY: flagJPN,
+  RWF: flagRWA,
+};
+
+// Mock wallet data (kept for backward compatibility during transition)
+const walletDetailsDataOld: Record<
   string,
   {
     customerName: string;
@@ -526,16 +542,33 @@ export default function WalletDetail() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
 
-  const walletData = walletDetailsData[id as keyof typeof walletDetailsData];
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["wallet", id],
+    queryFn: async () => {
+      const response = await fetch(`/api/wallets/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch wallet details");
+      }
+      return response.json();
+    },
+  });
 
-  console.log(walletData.subWallets);
+  if (isLoading) {
+    return (
+      <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
+        <div className="text-[#f7f7f7] text-xl font-['Nunito',sans-serif]">
+          Loading wallet details...
+        </div>
+      </div>
+    );
+  }
 
-  if (!walletData) {
+  if (error || !data?.success) {
     return (
       <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
         <div className="content-stretch flex flex-col gap-4 items-center">
           <p className="font-['Nunito',sans-serif] font-semibold leading-[28.8px] text-[#f7f7f7] text-2xl">
-            Wallet not found
+            {error ? `Error: ${error.message}` : "Wallet not found"}
           </p>
           <button
             onClick={() => navigate({ to: "/wallets" })}
@@ -549,6 +582,14 @@ export default function WalletDetail() {
       </div>
     );
   }
+
+  const walletData = data.data;
+
+  // Map subWallets to include flags
+  const subWalletsWithFlags = walletData.subWallets.map((sw: any) => ({
+    ...sw,
+    flag: currencyFlagMap[sw.currencyCode] || flagEUR,
+  }));
 
   return (
     <div className="bg-neutral-950 relative size-full min-h-screen pb-10">
@@ -713,7 +754,7 @@ export default function WalletDetail() {
                 className="flex flex-col overflow-y-auto"
                 style={{ maxHeight: "598px" }}
               >
-                {walletData.subWallets.map((wallet, index) => (
+                {subWalletsWithFlags.map((wallet: any, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedWallet(index)}

@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
-import flagEUR from "../assets/icons/flags/EUR.svg";
+import { useQuery } from "@tanstack/react-query";
+import flagEUR from "@/assets/icons/flags/EUR.svg";
 import MetricCard from "./dashboard/MetricCard";
 import exportIcon from "../assets/icons/export-icon.svg";
 import arrowDown from "../assets/icons/arrow-down-icon.svg";
@@ -11,49 +12,11 @@ import totalCustomersIcon from "../assets/icons/total-customer-icon.svg";
 import activeCustomersIcon from "../assets/icons/active-icon.svg";
 import newCustomersIcon from "../assets/icons/new-customer-icon.svg";
 
-// Mock API response data
-const CUSTOMERS_DATA = [
-  {
-    flag: [flagEUR],
-    name: "Chidi Uzoma",
-    email: "chidi.u@example.com",
-    phone: "+234 802 234 5678",
-    balance: "€ 450,500.00",
-    wallets: "37",
-    status: "active",
-    kycStatus: "verified",
-  },
-  {
-    flag: [flagEUR],
-    name: "Amara Nwachukwu",
-    email: "amara.n@example.com",
-    phone: "+234 909 987 6543",
-    balance: "€ 150,250.00",
-    wallets: "22",
-    status: "active",
-    kycStatus: "verified",
-  },
-  {
-    flag: [flagEUR],
-    name: "Amara Nwachukwu",
-    email: "amara.n@example.com",
-    phone: "+234 909 987 6543",
-    balance: "€ 150,250.00",
-    wallets: "22",
-    status: "active",
-    kycStatus: "verified",
-  },
-  {
-    flag: [flagEUR],
-    name: "Emeka Okafor",
-    email: "emeka.o@example.com",
-    phone: "+234 805 567 8901",
-    balance: "€ 100,250.00",
-    wallets: "18",
-    status: "inactive",
-    kycStatus: "pending",
-  },
-];
+// Flag mapping for currencies (can be extended as needed)
+const currencyFlagMap: Record<string, string> = {
+  EUR: flagEUR,
+  // Add more currency flags as needed
+};
 
 // Helper functions to get styling based on status
 const getStatusStyles = (status: string) => {
@@ -119,6 +82,53 @@ function ColumnHeader({
 export default function Customers() {
   const navigate = useNavigate();
 
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["customers"],
+    queryFn: async () => {
+      const response = await fetch("/api/customers/");
+      if (!response.ok) {
+        throw new Error("Failed to fetch customers");
+      }
+      return response.json();
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
+        <div className="text-[#f7f7f7] text-xl font-['Nunito',sans-serif]">
+          Loading customers...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
+        <div className="text-red-400 text-xl font-['Nunito',sans-serif]">
+          Error loading customers: {error.message}
+        </div>
+      </div>
+    );
+  }
+
+  const customers = data?.data || [];
+  const metrics = data?.metrics || {};
+  const total = data?.total || 0;
+
+  // Map API data to component format
+  const CUSTOMERS_DATA = customers.map((customer: any) => ({
+    flag: [currencyFlagMap[customer.currency] || flagEUR],
+    name: customer.name,
+    email: customer.email,
+    phone: customer.phone,
+    balance: customer.balance,
+    wallets: customer.wallets,
+    status: customer.status,
+    kycStatus: customer.kycStatus,
+  }));
+
   return (
     <div
       className="bg-neutral-950 relative size-full min-h-screen"
@@ -145,28 +155,28 @@ export default function Customers() {
           iconBg="bg-[#00c7be]"
           iconBorder="border-[#00e2d8]"
           title="Total Customers"
-          value="127"
+          value={String(metrics.totalCustomers || total)}
         />
         <MetricCard
           icon={activeCustomersIcon}
           iconBg="bg-[#0040c1]"
           iconBorder="border-[#004eeb]"
           title="Active Customers"
-          value="112"
+          value={String(metrics.activeCustomers || 0)}
         />
         <MetricCard
           icon={activeCustomersIcon}
           iconBg="bg-[#085d3a]"
           iconBorder="border-[#067647]"
           title="Inactive Customers"
-          value="109"
+          value={String(total - (metrics.activeCustomers || 0))}
         />
         <MetricCard
           icon={newCustomersIcon}
           iconBg="bg-[#93370d]"
           iconBorder="border-[#b54708]"
           title="New Customers"
-          value="12"
+          value={String(metrics.newCustomers || 0)}
         />
       </div>
 
@@ -258,7 +268,7 @@ export default function Customers() {
                 </div>
 
                 {/* Sample rows (static to mirror the design) */}
-                {CUSTOMERS_DATA.map((r, i) => {
+                {CUSTOMERS_DATA.map((r: any, i: number) => {
                   const statusStyles = getStatusStyles(r.status);
                   const kycStyles = getKycStyles(r.kycStatus);
 
@@ -347,7 +357,7 @@ export default function Customers() {
                 {/* Pagination */}
                 <div className="flex items-center justify-between gap-6 px-4 py-2">
                   <p className="font-[family-name:var(--body\/caption\/family,'Nunito:Medium',sans-serif)] font-[var(--body\/caption\/weight,500)] leading-[19.2px] text-[color:var(--colors\/grey\/800,#494949)] text-[length:var(--body\/caption\/size,12px)] tracking-[0.48px]">
-                    Showing 11 of 127 Customers
+                    Showing {CUSTOMERS_DATA.length} of {total} Customers
                   </p>
                   <div className="flex gap-4 items-center">
                     <div className="border border-[var(--colors\/grey\/800,#494949)] opacity-30 rounded-full">
