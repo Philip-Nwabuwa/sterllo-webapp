@@ -21,6 +21,7 @@ dist-ssr
 app/routeTree.gen.ts
 .vinxi
 .output
+.tanstack
 app.config.timestamp_*.js
 
 # Editor directories and files

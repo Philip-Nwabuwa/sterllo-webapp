@@ -17,18 +17,9 @@ import disputeActivityIcon from "../assets/icons/dispute-activity-icon.svg";
 import transferActivityIcon from "../assets/icons/transfer-activity-icon.svg";
 import customerActivityIcon from "../assets/icons/customer-activity-icon.svg";
 import disputeRedActivityIcon from "../assets/icons/dispute-red-activity-icon.svg";
-
-// Chart Assets
-import transactionChart from "../assets/images/transaction-chart.svg";
-import pieChart from "../assets/images/pie-chart.svg";
-
-// Legend Icons
-import pendingLegendIcon from "../assets/icons/pending-legend-icon.svg";
-import resolvedLegendIcon from "../assets/icons/resolved-legend-icon.svg";
-import eurLegendIcon from "../assets/icons/eur-legend-icon.svg";
-import gbpLegnedIcon from "../assets/icons/gbp-legend-icon.svg";
-import ngnLegendIcon from "../assets/icons/ngn-legend-icon.svg";
-import usdLegendIcon from "../assets/icons/usd-legend-icon.svg";
+import DisputeResolutionChart from "./common/DisputeResolutionChart";
+import Transactionvolumechart from "./common/Transactionvolumechart";
+import TopCurrenciesChart from "./common/TopCurrenciesChat";
 
 // Activity icon mapping
 const activityIconMap: Record<string, { icon: string; iconBg: string }> = {
@@ -40,7 +31,11 @@ const activityIconMap: Record<string, { icon: string; iconBg: string }> = {
 };
 
 export default function Dashboard() {
-  const { data, isLoading, error } = useQuery({
+  const {
+    data: dashboardData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["dashboardMetrics"],
     queryFn: async () => {
       const response = await fetch("/api/dashboard/metrics");
@@ -71,8 +66,8 @@ export default function Dashboard() {
     );
   }
 
-  const metrics = data?.data?.metrics || {};
-  const activityItems = (data?.data?.recentActivity || []).map(
+  const metrics = dashboardData?.data?.metrics || {};
+  const activityItems = (dashboardData?.data?.recentActivity || []).map(
     (activity: any) => {
       const iconData = activityIconMap[activity.type] || activityIconMap.wallet;
       return {
@@ -90,9 +85,21 @@ export default function Dashboard() {
       className="bg-neutral-950 min-h-screen w-full p-6"
       data-name="Dashboard"
     >
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-2 gap-6 max-w-[1488px] mx-auto">
-        {/* Metrics Container - Spans full width */}
+      <div className="flex gap-4 items-end pb-6">
+        <div className="flex flex-col gap-4 flex-1">
+          <div className="flex flex-col gap-2">
+            <p className="font-[family-name:var(--headings\/subheading-1\/family,'Nunito:SemiBold',sans-serif)] font-[var(--headings\/subheading-1-bold\/weight,600)] leading-[28.8px] text-[color:var(--colors\/grey\/100,#f7f7f7)] text-[length:var(--headings\/subheading-1\/size,24px)] tracking-[0.24px]">
+              Dashboard
+            </p>
+            <p className="font-[family-name:var(--body\/base\/family,'Nunito:Regular',sans-serif)] font-[var(--body\/base\/weight,400)] leading-[25.6px] text-[color:var(--colors\/grey\/600,#a2a2a2)] text-[length:var(--body\/base\/size,16px)] tracking-[0.024px]">
+              Welcome back! Here's what's happening with your financial
+              infrastructure.{" "}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6 mx-auto">
         <div className="col-span-2 flex gap-6 items-center justify-center">
           <MetricCard
             icon={activeCustomersIcon}
@@ -147,13 +154,7 @@ export default function Dashboard() {
               Transaction Volume
             </p>
           </div>
-          <div className="flex items-center justify-center p-4 h-[304px]">
-            <img
-              alt="Transaction Chart"
-              className="max-w-full max-h-full"
-              src={transactionChart}
-            />
-          </div>
+          <Transactionvolumechart />
         </div>
 
         {/* Recent Activity Feed - Right Column, spans 2 rows */}
@@ -187,79 +188,7 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Bar Chart Area */}
-            <div className="flex-1 overflow-hidden p-4">
-              {/* Simplified Bar Chart */}
-              <div className="flex items-end justify-between h-32 px-4">
-                {[
-                  { resolved: 80, pending: 41 },
-                  { resolved: 122, pending: 13 },
-                  { resolved: 93, pending: 85 },
-                  { resolved: 36, pending: 5 },
-                  { resolved: 130, pending: 25 },
-                  { resolved: 89, pending: 66 },
-                  { resolved: 17, pending: 28 },
-                ].map((bar, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center gap-1 w-8"
-                  >
-                    <div className="flex gap-1 items-end h-full">
-                      <div
-                        className="bg-[#079455] rounded-t-2xl w-3"
-                        style={{ height: `${(bar.resolved / 150) * 100}%` }}
-                      />
-                      <div
-                        className="bg-[#dc6803] rounded-t-2xl w-3"
-                        style={{ height: `${(bar.pending / 150) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Week Labels */}
-              <div className="flex justify-between px-4 mt-2">
-                {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map(
-                  (day) => (
-                    <p
-                      key={day}
-                      className="font-['Nunito',sans-serif] font-medium text-[#494949] text-[10px] text-center tracking-[0.5px] uppercase"
-                    >
-                      {day}
-                    </p>
-                  )
-                )}
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="border-[#313131] border-t-[0.5px] border-solid flex gap-8 items-center justify-center px-4 py-2 shrink-0">
-              <div className="flex gap-1 items-center">
-                <div className="size-2">
-                  <img
-                    alt="Pending"
-                    className="block max-w-none size-full"
-                    src={pendingLegendIcon}
-                  />
-                </div>
-                <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#dc6803] text-xs text-center text-nowrap tracking-[0.48px] whitespace-pre">
-                  Pending
-                </p>
-              </div>
-              <div className="flex gap-1 items-center">
-                <div className="size-2">
-                  <img
-                    alt="Resolved"
-                    className="block max-w-none size-full"
-                    src={resolvedLegendIcon}
-                  />
-                </div>
-                <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#079455] text-xs text-center text-nowrap tracking-[0.48px] whitespace-pre">
-                  Resolved
-                </p>
-              </div>
-            </div>
+            <DisputeResolutionChart />
           </div>
 
           {/* Top Currencies Pie Chart */}
@@ -269,67 +198,7 @@ export default function Dashboard() {
                 Top Currencies
               </p>
             </div>
-            <div className="flex gap-9 items-center justify-center overflow-hidden p-4 flex-1">
-              <div className="flex items-center justify-center py-[22px]">
-                <div className="size-[150px]">
-                  <img
-                    alt="Pie Chart"
-                    className="block max-w-none size-full"
-                    src={pieChart}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 justify-center">
-                <div className="flex gap-1 items-center">
-                  <div className="size-2">
-                    <img
-                      alt="EUR"
-                      className="block max-w-none size-full"
-                      src={eurLegendIcon}
-                    />
-                  </div>
-                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#ff2d55] text-xs tracking-[0.48px]">
-                    EUR (10%)
-                  </p>
-                </div>
-                <div className="flex gap-1 items-center">
-                  <div className="size-2">
-                    <img
-                      alt="GBP"
-                      className="block max-w-none size-full"
-                      src={gbpLegnedIcon}
-                    />
-                  </div>
-                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#2970ff] text-xs tracking-[0.48px]">
-                    GBP (15%)
-                  </p>
-                </div>
-                <div className="flex gap-1 items-center">
-                  <div className="size-2">
-                    <img
-                      alt="NGN"
-                      className="block max-w-none size-full"
-                      src={ngnLegendIcon}
-                    />
-                  </div>
-                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#bad133] text-xs tracking-[0.48px]">
-                    NGN (45%)
-                  </p>
-                </div>
-                <div className="flex gap-1 items-center">
-                  <div className="size-2">
-                    <img
-                      alt="USD"
-                      className="block max-w-none size-full"
-                      src={usdLegendIcon}
-                    />
-                  </div>
-                  <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] text-[#17b26a] text-xs tracking-[0.48px]">
-                    USD (30%)
-                  </p>
-                </div>
-              </div>
-            </div>
+            <TopCurrenciesChart />
           </div>
         </div>
       </div>

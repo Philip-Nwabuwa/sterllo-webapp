@@ -1,101 +1,149 @@
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-
-// Zod schema for form validation
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email or username is required")
-    .refine(
-      (value) => {
-        // Allow either email format or username (no @ symbol)
-        return value.includes("@")
-          ? z.string().email().safeParse(value).success
-          : value.length >= 3;
-      },
-      {
-        message: "Please enter a valid email or username (min 3 characters)",
-      }
-    ),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(100, "Password must be less than 100 characters"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
-// Reusable Components
 import Logo from "./common/Logo";
 
-// SVG Assets - Local imports
 import bgImage from "../assets/images/bg-image.svg";
 import securityIcon from "../assets/icons/security-icon.svg";
-import emailIcon from "../assets/icons/email-icon.svg";
-import passwordIcon from "../assets/icons/password-icon.svg";
+import { useEffect, useState } from "react";
+import type { SubAccount } from "../types/auth";
+import { cookieUtils } from "../lib/cookies";
+import { useAuthStore } from "../store/authStore";
+import SubAccountSelector from "./SubAccountSelector";
 
 export default function WelcomeBack() {
-  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [subAccounts, setSubAccounts] = useState<SubAccount[]>([]);
+  const [showSubAccountSelector, setShowSubAccountSelector] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    mode: "onBlur",
-  });
+  const { setUserData, setSubAccounts: setStoreSubAccounts } = useAuthStore();
 
-  const loginMutation = useMutation({
-    mutationFn: async (data: LoginFormData) => {
-      const response = await fetch("/api/auth/login", {
+  const accountUrl =
+    "https://account.redbiller.com/login/?rr=http://localhost:3000/login";
+
+  const getToken = () => {
+    if (typeof window === "undefined") return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get("x92Qko8x9UwMs8") || "";
+  };
+
+  const fetchSubAccounts = async (userKey: string, sessionId: string) => {
+    try {
+      console.log("Fetching sub-accounts...", { userKey, sessionId });
+
+      const response = await fetch("/api/auth/sub-accounts", {
+        method: "GET",
+        headers: {
+          key: userKey,
+          session_id: sessionId,
+        },
+      });
+
+      const result = await response.json();
+
+      console.log("Sub-accounts fetch result:", result);
+
+      if (result.success && result.data.data) {
+        const accounts = result.data.data;
+        setSubAccounts(accounts);
+        setStoreSubAccounts(accounts);
+
+        // Show the sub-account selector
+        setShowSubAccountSelector(true);
+
+        return accounts;
+      } else {
+        console.error("Failed to fetch sub-accounts:", result.error);
+        setError(result.error || "Failed to fetch sub-accounts");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching sub-accounts:", error);
+      setError("Failed to fetch sub-accounts");
+      return null;
+    }
+  };
+
+  const validateToken = async (token: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/validate-token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ token }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Login failed");
-      }
+      const result = await response.json();
 
-      return response.json();
-    },
-    onSuccess: (data) => {
-      console.log("Login successful:", data);
-      // Store token if needed
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-      }
-      // Navigate to dashboard after successful login
-      navigate({ to: "/dashboard" });
-    },
-    onError: (error: Error) => {
-      console.error("Login error:", error);
-      setError("root", {
-        message: error.message || "Login failed. Please try again.",
-      });
-    },
-  });
+      // Log on client side
+      console.log("Token validation result:", result);
 
-  const onSubmit = async (data: LoginFormData) => {
-    loginMutation.mutate(data);
+      if (result.success && result.data.data) {
+        const userData = result.data.data;
+        console.log("Token validated successfully:", userData);
+
+        // Store profile.key as userKey in cookies
+        const userKey = userData.profile.key;
+        const sessionId = userData.session.id;
+
+        cookieUtils.set("userKey", userKey, 1);
+        cookieUtils.set("sessionId", sessionId, 1);
+
+        console.log("Stored in cookies:", { userKey, sessionId });
+
+        // Store full user data in Zustand (localStorage)
+        setUserData(userData);
+
+        // Fetch sub-accounts
+        await fetchSubAccounts(userKey, sessionId);
+
+        return userData;
+      } else {
+        console.error("Token validation failed:", result.error);
+        setError(result.error || "Token validation failed");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error validating token:", error);
+      setError("Failed to validate token");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleForgotPassword = () => {
-    console.log("Forgot password clicked");
-    // TODO: Implement forgot password logic
+  const handleSubAccountSelect = (account: SubAccount) => {
+    console.log("Sub-account selected:", account);
   };
 
-  const handleCreateAccount = () => {
-    console.log("Create account clicked");
-    // TODO: Navigate to signup page
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      console.log("Token found in URL, validating...", token);
+      validateToken(token);
+    }
+  }, []);
+
+  // Show sub-account selector if we have sub-accounts
+  if (showSubAccountSelector && subAccounts.length > 0) {
+    return (
+      <SubAccountSelector
+        subAccounts={subAccounts}
+        onSelect={handleSubAccountSelect}
+      />
+    );
+  }
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      window.location.href = accountUrl;
+    } catch (error) {
+      setError("Failed to login");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -103,12 +151,10 @@ export default function WelcomeBack() {
       className="bg-white grid grid-cols-[538px_1fr] h-screen"
       data-name="WelcomeBack"
     >
-      {/* Left Panel - Branding */}
       <div
         className="relative box-border content-stretch flex flex-col h-full items-center justify-between overflow-hidden px-0 py-12"
         data-name="LeftPanel"
       >
-        {/* Background Image */}
         <div
           className="absolute h-[1092px] left-[-355px] top-0 w-[1456px]"
           data-name="BackgroundImage"
@@ -116,13 +162,12 @@ export default function WelcomeBack() {
           <img alt="" className="block max-w-none size-full" src={bgImage} />
         </div>
 
-        {/* Logo */}
         <Logo className="h-6 overflow-hidden relative shrink-0 w-[102px] z-10" />
 
         {/* Copyright */}
         <div className="flex flex-col font-['Nunito',sans-serif] font-normal justify-end leading-none relative shrink-0 text-[#a2a2a2] text-base text-nowrap tracking-[0.024px] z-10">
           <p className="leading-[25.6px] whitespace-pre">
-            © 2025 Redbiller. All rights reserved
+            © {new Date().getFullYear()} Redbiller. All rights reserved
           </p>
         </div>
       </div>
@@ -176,125 +221,23 @@ export default function WelcomeBack() {
 
         {/* Form Container */}
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={onSubmit}
           className="content-stretch flex flex-col gap-8 items-center relative shrink-0 w-[400px]"
           data-name="FormContainer"
         >
-          {/* Input Fields */}
-          <div
-            className="content-stretch flex flex-col gap-4 items-start relative shrink-0 w-full"
-            data-name="InputFields"
-          >
-            {/* Error Message */}
-            {errors.root && (
-              <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 w-full">
-                <p className="text-red-400 text-sm font-['Nunito',sans-serif]">
-                  {errors.root.message}
-                </p>
-              </div>
-            )}
-
-            {/* Email/Username Field */}
-            <div
-              className="content-stretch flex flex-col items-start relative shrink-0 w-full"
-              data-name="EmailField"
-            >
-              <div
-                className="box-border content-stretch flex gap-1 items-center p-1 relative shrink-0 w-full"
-                data-name="Label"
-              >
-                <label className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm text-nowrap tracking-[-0.28px] whitespace-pre">
-                  Username / Email
-                </label>
-              </div>
-              <div
-                className="bg-[#181818] border-[#313131] border-[0.5px] border-solid box-border content-stretch flex gap-2 items-center p-4 relative rounded-2xl shrink-0 w-full"
-                data-name="EmailInput"
-              >
-                <div className="relative shrink-0 size-5" data-name="EmailIcon">
-                  <img
-                    alt="Email"
-                    className="block max-w-none size-full"
-                    src={emailIcon}
-                  />
-                </div>
-                <input
-                  {...register("email")}
-                  type="text"
-                  placeholder="johndoe@youremail.com"
-                  className="basis-0 bg-transparent grow h-[23px] min-h-px min-w-px relative shrink-0 font-['Nunito',sans-serif] font-normal leading-[22.4px] text-sm tracking-[-0.28px] text-white placeholder:text-[#494949] border-none outline-none"
-                />
-              </div>
-              {errors.email && (
-                <p className="text-red-400 text-sm mt-1 font-['Nunito',sans-serif]">
-                  {errors.email.message}
-                </p>
-              )}
+          {/* Error Message */}
+          {error && (
+            <div className="w-full bg-red-900/20 border border-red-500 rounded-lg px-4 py-3">
+              <p className="font-['Nunito',sans-serif] text-red-400 text-sm text-center">
+                {error}
+              </p>
             </div>
-
-            {/* Password Field */}
-            <div
-              className="content-stretch flex flex-col items-start relative shrink-0 w-full"
-              data-name="PasswordField"
-            >
-              <div
-                className="box-border content-stretch flex gap-1 items-center p-1 relative shrink-0 w-full"
-                data-name="Label"
-              >
-                <label className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm text-nowrap tracking-[-0.28px] whitespace-pre">
-                  Password
-                </label>
-              </div>
-              <div
-                className="bg-[#181818] border-[#313131] border-[0.5px] border-solid box-border content-stretch flex gap-2 items-center p-4 relative rounded-2xl shrink-0 w-full"
-                data-name="PasswordInput"
-              >
-                <div
-                  className="relative shrink-0 size-5"
-                  data-name="PasswordIcon"
-                >
-                  <img
-                    alt="Password"
-                    className="block max-w-none size-full"
-                    src={passwordIcon}
-                  />
-                </div>
-                <input
-                  {...register("password")}
-                  type="password"
-                  placeholder="••••••••"
-                  className="basis-0 bg-transparent grow h-[23px] min-h-px min-w-px relative shrink-0 font-['Nunito',sans-serif] font-normal leading-[22.4px] text-sm tracking-[-0.28px] text-white placeholder:text-[#494949] border-none outline-none"
-                />
-              </div>
-              {errors.password && (
-                <p className="text-red-400 text-sm mt-1 font-['Nunito',sans-serif]">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            {/* Forgot Password Link */}
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="box-border content-stretch flex gap-2 items-center justify-center overflow-hidden px-5 py-2.5 relative rounded-full shrink-0 w-full hover:bg-[#1a1a1a] transition-colors"
-              data-name="ForgotPasswordButton"
-            >
-              <div
-                className="box-border content-stretch flex gap-1 items-center justify-center px-1 py-0 relative shrink-0"
-                data-name="TextContainer"
-              >
-                <p className="font-['Nunito',sans-serif] leading-[16.8px] relative shrink-0 text-[#bad133] text-sm text-nowrap tracking-[0.14px] whitespace-pre">
-                  Forgot Password?
-                </p>
-              </div>
-            </button>
-          </div>
+          )}
 
           {/* Login Button */}
           <button
             type="submit"
-            disabled={loginMutation.isPending}
+            disabled={isLoading}
             className="bg-[#D3F60B] border-[#97ab27] border-[0.5px] border-solid relative rounded-full shrink-0 w-full hover:bg-[#a5bc2e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             data-name="LoginButton"
           >
@@ -304,27 +247,9 @@ export default function WelcomeBack() {
                 data-name="TextContainer"
               >
                 <p className="font-['Nunito',sans-serif] font-semibold leading-[21.6px] relative shrink-0 text-[#262b0a] text-lg text-nowrap tracking-[0.18px] whitespace-pre">
-                  {loginMutation.isPending ? "Logging in..." : "Login"}
+                  {isLoading ? "Logging in..." : "Login"}
                 </p>
               </div>
-            </div>
-          </button>
-
-          {/* Create Account Link */}
-          <button
-            type="button"
-            onClick={handleCreateAccount}
-            className="box-border content-stretch flex gap-2 items-center justify-center overflow-hidden px-6 py-3 relative rounded-full shrink-0 w-full hover:bg-[#1a1a1a] transition-colors"
-            data-name="CreateAccountButton"
-          >
-            <div
-              className="box-border content-stretch flex gap-1 items-center justify-center px-1 py-0 relative shrink-0"
-              data-name="TextContainer"
-            >
-              <p className="font-['Nunito',sans-serif] font-semibold leading-[21.6px] relative shrink-0 text-[#717171] text-lg text-nowrap tracking-[0.18px] whitespace-pre">
-                <span>Don't have an account? </span>
-                <span className="text-[#bad133]">Create Account</span>
-              </p>
             </div>
           </button>
         </form>

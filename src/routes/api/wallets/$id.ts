@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 
-type TransactionStatus = 'Successful' | 'Pending' | 'Failed'
+type TransactionStatus = 'Processing' | 'Completed' | 'Failed'
 
 // Mock wallet details data - in production, this would come from a database
 const MOCK_WALLET_DETAILS: Record<
@@ -73,7 +73,7 @@ const MOCK_WALLET_DETAILS: Record<
         referenceId: 'TXN123456789',
         fee: '₦ 100.00',
         openingBalance: '₦ 300,750.00',
-        status: 'Successful',
+        status: 'Completed',
       },
       {
         service: 'Deposit',
@@ -84,14 +84,14 @@ const MOCK_WALLET_DETAILS: Record<
         referenceId: 'TXN987654321',
         fee: '₦ 0.00',
         openingBalance: '₦ 200,750.00',
-        status: 'Successful',
+        status: 'Completed',
       },
       {
         service: 'Withdrawal',
         amount: '₦ 25,000.00',
         balance: '₦ 200,750.00',
         date: '2024-10-13',
-        status: 'Pending',
+        status: 'Processing',
       },
     ],
   },
@@ -115,13 +115,13 @@ const MOCK_WALLET_DETAILS: Record<
         amount: 'GH₵ 5,000.00',
         balance: 'GH₵ 55,400.00',
         date: '2024-10-10',
-        status: 'Successful',
+        status: 'Completed',
       },
     ],
   },
 }
 
-export const Route = createFileRoute('/api/wallets/id')({
+export const Route = createFileRoute('/api/wallets/$id')({
   server: {
     handlers: {
       GET: async ({ request, params }) => {

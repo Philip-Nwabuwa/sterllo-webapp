@@ -13,17 +13,18 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExampleRouteImport } from './routes/example'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedWalletsRouteImport } from './routes/_authenticated/wallets'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as ApiWalletsIndexRouteImport } from './routes/api/wallets/index'
 import { Route as ApiUsersIndexRouteImport } from './routes/api/users/index'
 import { Route as ApiCustomersIndexRouteImport } from './routes/api/customers/index'
-import { Route as ApiWalletsIdRouteImport } from './routes/api/wallets/[id]'
+import { Route as AuthenticatedWalletsIndexRouteImport } from './routes/_authenticated/wallets.index'
+import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers.index'
+import { Route as ApiWalletsIdRouteImport } from './routes/api/wallets/$id'
 import { Route as ApiUsersIdRouteImport } from './routes/api/users/$id'
 import { Route as ApiDashboardMetricsRouteImport } from './routes/api/dashboard/metrics'
 import { Route as ApiCustomersIdRouteImport } from './routes/api/customers/[id]'
-import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthValidateTokenRouteImport } from './routes/api/auth/validate-token'
+import { Route as ApiAuthSubAccountsRouteImport } from './routes/api/auth/sub-accounts'
 import { Route as AuthenticatedWalletsIdRouteImport } from './routes/_authenticated/wallets.$id'
 import { Route as AuthenticatedCustomersIdRouteImport } from './routes/_authenticated/customers.$id'
 
@@ -46,19 +47,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedWalletsRoute = AuthenticatedWalletsRouteImport.update({
-  id: '/wallets',
-  path: '/wallets',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
-  id: '/customers',
-  path: '/customers',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const ApiWalletsIndexRoute = ApiWalletsIndexRouteImport.update({
@@ -76,9 +67,21 @@ const ApiCustomersIndexRoute = ApiCustomersIndexRouteImport.update({
   path: '/api/customers/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWalletsIndexRoute =
+  AuthenticatedWalletsIndexRouteImport.update({
+    id: '/wallets/',
+    path: '/wallets/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCustomersIndexRoute =
+  AuthenticatedCustomersIndexRouteImport.update({
+    id: '/customers/',
+    path: '/customers/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ApiWalletsIdRoute = ApiWalletsIdRouteImport.update({
-  id: '/api/wallets/id',
-  path: '/api/wallets/id',
+  id: '/api/wallets/$id',
+  path: '/api/wallets/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUsersIdRoute = ApiUsersIdRouteImport.update({
@@ -96,37 +99,43 @@ const ApiCustomersIdRoute = ApiCustomersIdRouteImport.update({
   path: '/api/customers/id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
-  id: '/api/auth/login',
-  path: '/api/auth/login',
+const ApiAuthValidateTokenRoute = ApiAuthValidateTokenRouteImport.update({
+  id: '/api/auth/validate-token',
+  path: '/api/auth/validate-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSubAccountsRoute = ApiAuthSubAccountsRouteImport.update({
+  id: '/api/auth/sub-accounts',
+  path: '/api/auth/sub-accounts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWalletsIdRoute = AuthenticatedWalletsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AuthenticatedWalletsRoute,
+  id: '/wallets/$id',
+  path: '/wallets/$id',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCustomersIdRoute =
   AuthenticatedCustomersIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedCustomersRoute,
+    id: '/customers/$id',
+    path: '/customers/$id',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/example': typeof ExampleRoute
   '/login': typeof LoginRoute
-  '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/wallets': typeof AuthenticatedWalletsRouteWithChildren
   '/customers/$id': typeof AuthenticatedCustomersIdRoute
   '/wallets/$id': typeof AuthenticatedWalletsIdRoute
-  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/sub-accounts': typeof ApiAuthSubAccountsRoute
+  '/api/auth/validate-token': typeof ApiAuthValidateTokenRoute
   '/api/customers/id': typeof ApiCustomersIdRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
   '/api/users/$id': typeof ApiUsersIdRoute
-  '/api/wallets/id': typeof ApiWalletsIdRoute
+  '/api/wallets/$id': typeof ApiWalletsIdRoute
+  '/customers': typeof AuthenticatedCustomersIndexRoute
+  '/wallets': typeof AuthenticatedWalletsIndexRoute
   '/api/customers': typeof ApiCustomersIndexRoute
   '/api/users': typeof ApiUsersIndexRoute
   '/api/wallets': typeof ApiWalletsIndexRoute
@@ -135,16 +144,17 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/example': typeof ExampleRoute
   '/login': typeof LoginRoute
-  '/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/wallets': typeof AuthenticatedWalletsRouteWithChildren
   '/customers/$id': typeof AuthenticatedCustomersIdRoute
   '/wallets/$id': typeof AuthenticatedWalletsIdRoute
-  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/sub-accounts': typeof ApiAuthSubAccountsRoute
+  '/api/auth/validate-token': typeof ApiAuthValidateTokenRoute
   '/api/customers/id': typeof ApiCustomersIdRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
   '/api/users/$id': typeof ApiUsersIdRoute
-  '/api/wallets/id': typeof ApiWalletsIdRoute
+  '/api/wallets/$id': typeof ApiWalletsIdRoute
+  '/customers': typeof AuthenticatedCustomersIndexRoute
+  '/wallets': typeof AuthenticatedWalletsIndexRoute
   '/api/customers': typeof ApiCustomersIndexRoute
   '/api/users': typeof ApiUsersIndexRoute
   '/api/wallets': typeof ApiWalletsIndexRoute
@@ -155,16 +165,17 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/example': typeof ExampleRoute
   '/login': typeof LoginRoute
-  '/_authenticated/customers': typeof AuthenticatedCustomersRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/wallets': typeof AuthenticatedWalletsRouteWithChildren
   '/_authenticated/customers/$id': typeof AuthenticatedCustomersIdRoute
   '/_authenticated/wallets/$id': typeof AuthenticatedWalletsIdRoute
-  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/sub-accounts': typeof ApiAuthSubAccountsRoute
+  '/api/auth/validate-token': typeof ApiAuthValidateTokenRoute
   '/api/customers/id': typeof ApiCustomersIdRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
   '/api/users/$id': typeof ApiUsersIdRoute
-  '/api/wallets/id': typeof ApiWalletsIdRoute
+  '/api/wallets/$id': typeof ApiWalletsIdRoute
+  '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
+  '/_authenticated/wallets/': typeof AuthenticatedWalletsIndexRoute
   '/api/customers/': typeof ApiCustomersIndexRoute
   '/api/users/': typeof ApiUsersIndexRoute
   '/api/wallets/': typeof ApiWalletsIndexRoute
@@ -175,16 +186,17 @@ export interface FileRouteTypes {
     | '/'
     | '/example'
     | '/login'
-    | '/customers'
     | '/dashboard'
-    | '/wallets'
     | '/customers/$id'
     | '/wallets/$id'
-    | '/api/auth/login'
+    | '/api/auth/sub-accounts'
+    | '/api/auth/validate-token'
     | '/api/customers/id'
     | '/api/dashboard/metrics'
     | '/api/users/$id'
-    | '/api/wallets/id'
+    | '/api/wallets/$id'
+    | '/customers'
+    | '/wallets'
     | '/api/customers'
     | '/api/users'
     | '/api/wallets'
@@ -193,16 +205,17 @@ export interface FileRouteTypes {
     | '/'
     | '/example'
     | '/login'
-    | '/customers'
     | '/dashboard'
-    | '/wallets'
     | '/customers/$id'
     | '/wallets/$id'
-    | '/api/auth/login'
+    | '/api/auth/sub-accounts'
+    | '/api/auth/validate-token'
     | '/api/customers/id'
     | '/api/dashboard/metrics'
     | '/api/users/$id'
-    | '/api/wallets/id'
+    | '/api/wallets/$id'
+    | '/customers'
+    | '/wallets'
     | '/api/customers'
     | '/api/users'
     | '/api/wallets'
@@ -212,16 +225,17 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/example'
     | '/login'
-    | '/_authenticated/customers'
     | '/_authenticated/dashboard'
-    | '/_authenticated/wallets'
     | '/_authenticated/customers/$id'
     | '/_authenticated/wallets/$id'
-    | '/api/auth/login'
+    | '/api/auth/sub-accounts'
+    | '/api/auth/validate-token'
     | '/api/customers/id'
     | '/api/dashboard/metrics'
     | '/api/users/$id'
-    | '/api/wallets/id'
+    | '/api/wallets/$id'
+    | '/_authenticated/customers/'
+    | '/_authenticated/wallets/'
     | '/api/customers/'
     | '/api/users/'
     | '/api/wallets/'
@@ -232,7 +246,8 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ExampleRoute: typeof ExampleRoute
   LoginRoute: typeof LoginRoute
-  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthSubAccountsRoute: typeof ApiAuthSubAccountsRoute
+  ApiAuthValidateTokenRoute: typeof ApiAuthValidateTokenRoute
   ApiCustomersIdRoute: typeof ApiCustomersIdRoute
   ApiDashboardMetricsRoute: typeof ApiDashboardMetricsRoute
   ApiUsersIdRoute: typeof ApiUsersIdRoute
@@ -272,25 +287,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/wallets': {
-      id: '/_authenticated/wallets'
-      path: '/wallets'
-      fullPath: '/wallets'
-      preLoaderRoute: typeof AuthenticatedWalletsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/customers': {
-      id: '/_authenticated/customers'
-      path: '/customers'
-      fullPath: '/customers'
-      preLoaderRoute: typeof AuthenticatedCustomersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/api/wallets/': {
@@ -314,10 +315,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCustomersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/wallets/id': {
-      id: '/api/wallets/id'
-      path: '/api/wallets/id'
-      fullPath: '/api/wallets/id'
+    '/_authenticated/wallets/': {
+      id: '/_authenticated/wallets/'
+      path: '/wallets'
+      fullPath: '/wallets'
+      preLoaderRoute: typeof AuthenticatedWalletsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/customers/': {
+      id: '/_authenticated/customers/'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AuthenticatedCustomersIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/wallets/$id': {
+      id: '/api/wallets/$id'
+      path: '/api/wallets/$id'
+      fullPath: '/api/wallets/$id'
       preLoaderRoute: typeof ApiWalletsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -342,65 +357,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCustomersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/login': {
-      id: '/api/auth/login'
-      path: '/api/auth/login'
-      fullPath: '/api/auth/login'
-      preLoaderRoute: typeof ApiAuthLoginRouteImport
+    '/api/auth/validate-token': {
+      id: '/api/auth/validate-token'
+      path: '/api/auth/validate-token'
+      fullPath: '/api/auth/validate-token'
+      preLoaderRoute: typeof ApiAuthValidateTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/sub-accounts': {
+      id: '/api/auth/sub-accounts'
+      path: '/api/auth/sub-accounts'
+      fullPath: '/api/auth/sub-accounts'
+      preLoaderRoute: typeof ApiAuthSubAccountsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/wallets/$id': {
       id: '/_authenticated/wallets/$id'
-      path: '/$id'
+      path: '/wallets/$id'
       fullPath: '/wallets/$id'
       preLoaderRoute: typeof AuthenticatedWalletsIdRouteImport
-      parentRoute: typeof AuthenticatedWalletsRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/customers/$id': {
       id: '/_authenticated/customers/$id'
-      path: '/$id'
+      path: '/customers/$id'
       fullPath: '/customers/$id'
       preLoaderRoute: typeof AuthenticatedCustomersIdRouteImport
-      parentRoute: typeof AuthenticatedCustomersRoute
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
-interface AuthenticatedCustomersRouteChildren {
-  AuthenticatedCustomersIdRoute: typeof AuthenticatedCustomersIdRoute
-}
-
-const AuthenticatedCustomersRouteChildren: AuthenticatedCustomersRouteChildren =
-  {
-    AuthenticatedCustomersIdRoute: AuthenticatedCustomersIdRoute,
-  }
-
-const AuthenticatedCustomersRouteWithChildren =
-  AuthenticatedCustomersRoute._addFileChildren(
-    AuthenticatedCustomersRouteChildren,
-  )
-
-interface AuthenticatedWalletsRouteChildren {
-  AuthenticatedWalletsIdRoute: typeof AuthenticatedWalletsIdRoute
-}
-
-const AuthenticatedWalletsRouteChildren: AuthenticatedWalletsRouteChildren = {
-  AuthenticatedWalletsIdRoute: AuthenticatedWalletsIdRoute,
-}
-
-const AuthenticatedWalletsRouteWithChildren =
-  AuthenticatedWalletsRoute._addFileChildren(AuthenticatedWalletsRouteChildren)
-
 interface AuthenticatedRouteChildren {
-  AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedWalletsRoute: typeof AuthenticatedWalletsRouteWithChildren
+  AuthenticatedCustomersIdRoute: typeof AuthenticatedCustomersIdRoute
+  AuthenticatedWalletsIdRoute: typeof AuthenticatedWalletsIdRoute
+  AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
+  AuthenticatedWalletsIndexRoute: typeof AuthenticatedWalletsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedCustomersRoute: AuthenticatedCustomersRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedWalletsRoute: AuthenticatedWalletsRouteWithChildren,
+  AuthenticatedCustomersIdRoute: AuthenticatedCustomersIdRoute,
+  AuthenticatedWalletsIdRoute: AuthenticatedWalletsIdRoute,
+  AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,
+  AuthenticatedWalletsIndexRoute: AuthenticatedWalletsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -412,7 +413,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ExampleRoute: ExampleRoute,
   LoginRoute: LoginRoute,
-  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthSubAccountsRoute: ApiAuthSubAccountsRoute,
+  ApiAuthValidateTokenRoute: ApiAuthValidateTokenRoute,
   ApiCustomersIdRoute: ApiCustomersIdRoute,
   ApiDashboardMetricsRoute: ApiDashboardMetricsRoute,
   ApiUsersIdRoute: ApiUsersIdRoute,

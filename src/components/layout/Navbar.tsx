@@ -45,7 +45,7 @@ export default function Navbar({ className, customNavItems }: NavbarProps) {
           key={item.path}
           icon={item.icon}
           label={item.label}
-          isActive={location.pathname === item.path}
+          isActive={location.pathname.startsWith(item.path)}
           hasDropdown={item.hasDropdown}
           onClick={() => navigate({ to: item.path as any })}
         />

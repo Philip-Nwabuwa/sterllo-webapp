@@ -38,11 +38,9 @@ export default function NavLink({
             <p
               className={`basis-0 font-['Nunito',sans-serif] ${
                 isActive
-                  ? "font-bold text-[#f7f7f7]"
+                  ? "font-normal text-[#f7f7f7]"
                   : "font-normal text-[#717171]"
-              } grow leading-[21px] min-h-px min-w-px relative shrink-0 text-sm ${
-                isActive ? "tracking-[0.035px]" : "tracking-[-0.28px]"
-              }`}
+              } grow leading-[21px] min-h-px min-w-px relative shrink-0 text-sm`}
             >
               {label}
             </p>
