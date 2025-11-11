@@ -28,7 +28,7 @@ export default function SubAccountSelector({
     setIsLoading(true);
     try {
       // Store the selected profile.key in cookies
-      cookieUtils.set("selectedProfileKey", selectedAccount.profile.key, 7);
+      cookieUtils.set("accountKey", selectedAccount.profile.key, 7);
 
       // Store the selected account data in Zustand
       setSelectedSubAccount(selectedAccount);
