@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
@@ -6,125 +6,149 @@ import { useQuery } from "@tanstack/react-query";
 import MetricCard from "./dashboard/MetricCard";
 
 // Metric Icons
-import walletsMetricIcon from "../assets/icons/wallets-metric-icon.svg";
-import transactionsIcon from "../assets/icons/transactions-icon.svg";
-import uptimeIcon from "../assets/icons/uptime-icon.svg";
+import totalCustomersIcon from "../assets/icons/total-customer-icon.svg";
+import activeCustomersIcon from "../assets/icons/active-icon.svg";
+import newCustomersIcon from "../assets/icons/new-customer-icon.svg";
+import arrowDown from "../assets/icons/arrow-down-icon.svg";
 
-// Flag assets from Figma export
-import flagEUR from "../assets/icons/flags/EUR.svg";
-import flagGHA from "../assets/icons/flags/GHA.svg";
-import flagCHE from "../assets/icons/flags/CHE.svg";
-import flagGBR from "../assets/icons/flags/GBR.svg";
-import flagUGA from "../assets/icons/flags/UGA.svg";
-import flagCAN from "../assets/icons/flags/CAN.svg";
-import flagAUS from "../assets/icons/flags/AUS.svg";
-import flagJPN from "../assets/icons/flags/JPN.svg";
-import flagRWA from "../assets/icons/flags/RWA.svg";
-import flagUSA from "../assets/icons/flags/USA.svg";
-
-type WalletStatus = "Active" | "Inactive" | "Suspended";
-
-interface WalletData {
-  id: number;
-  customerName: string;
-  flag: string;
-  currency: string;
-  balance1: string;
-  balance2: string;
-  balance3: string;
-  status: WalletStatus;
-  dateCreated: string;
-  lastActivity: string;
-}
-
-// Flag mapping for currencies
-const currencyFlagMap: Record<string, string> = {
-  EUR: flagEUR,
-  GHS: flagGHA,
-  CHF: flagCHE,
-  GBP: flagGBR,
-  UGX: flagUGA,
-  CAD: flagCAN,
-  AUD: flagAUS,
-  JPY: flagJPN,
-  RWF: flagRWA,
-  USD: flagUSA,
-};
-
-function getStatusStyles(status: WalletStatus) {
-  switch (status) {
-    case "Active":
+// Helper functions to get styling based on status
+const getStatusStyles = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "active":
       return {
-        bg: "bg-[#053321]",
-        border: "border-[#074d31]",
-        text: "text-[#17b26a]",
+        className: "bg-[#053321] border-[#17B26A] text-[#17B26A]",
+        text: "Active",
       };
-    case "Inactive":
+    case "inactive":
       return {
-        bg: "bg-[#313131]",
-        border: "border-[#494949]",
-        text: "text-[#fff]",
+        className: "bg-[#313131] border-[#494949] text-[#FEDF89]",
+        text: "Inactive",
       };
-    case "Suspended":
+    case "closed":
       return {
-        bg: "bg-[rgba(85,22,12,0.2)]",
-        border: "border-[#431008]",
-        text: "text-[#912018]",
+        className: "bg-[#55160C] border-[#7A271A] text-[#FDA29B]",
+        text: "Closed",
+      };
+    default:
+      return {
+        className: "bg-[#313131] border-[#494949] text-[#fff]",
+        text: status,
       };
   }
-}
+};
+
+const getKycStyles = (kycStatus: string) => {
+  switch (kycStatus.toLowerCase()) {
+    case "verified":
+      return {
+        className: "bg-[#053321] border-[#17B26A] text-[#17B26A]",
+        text: "Verified",
+      };
+    case "pending":
+      return {
+        className: "bg-[#93370D] border-[#7A2E0E] text-[#FEDF89]",
+        text: "Pending",
+      };
+    case "rejected":
+      return {
+        className: "bg-[#55160C] border-[#7A271A] text-[#FDA29B]",
+        text: "Rejected",
+      };
+    default:
+      return {
+        className: "bg-[#313131] border-[#494949] text-[#fff]",
+        text: kycStatus,
+      };
+  }
+};
 
 export default function Wallets() {
-  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [limit, setLimit] = useState(25);
+  const [page, setPage] = useState(1);
+  const [showLimitDropdown, setShowLimitDropdown] = useState(false);
+
+  const queryString = useMemo(() => {
+    const params = new URLSearchParams();
+
+    // Search term can be used for email, reference, or phone
+    if (searchTerm) {
+      // Try to determine what type of search term it is
+      if (searchTerm.includes("@")) {
+        params.append("email_address", searchTerm);
+      } else if (/^\+?\d+$/.test(searchTerm)) {
+        const formattedSearchTerm = searchTerm.replace(/^\+234/, "0");
+        params.append("phone_number", formattedSearchTerm);
+      } else {
+        params.append("reference", searchTerm);
+      }
+    }
+
+    if (limit) params.append("limit", limit.toString());
+    if (page) params.append("page", page.toString());
+
+    return params.toString();
+  }, [searchTerm, limit, page]);
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["wallets"],
+    queryKey: ["customers", queryString],
     queryFn: async () => {
-      const response = await fetch("/api/wallets/");
+      // Use full URL for TanStack Start server handlers
+      const baseUrl =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "http://localhost:3000";
+      const url = `${baseUrl}/api/customers/${queryString ? `?${queryString}` : ""}`;
+
+      const response = await fetch(url, {
+        credentials: "include", // Include cookies for authentication
+      });
       if (!response.ok) {
-        throw new Error("Failed to fetch wallets");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `Failed to fetch customers: ${response.status}`
+        );
       }
       return response.json();
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
-        <div className="text-[#f7f7f7] text-xl font-['Nunito',sans-serif]">
-          Loading wallets...
-        </div>
-      </div>
-    );
-  }
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchTerm(searchInput);
+    setPage(1);
+  };
 
+  // Handle error state
   if (error) {
     return (
       <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
         <div className="text-red-400 text-xl font-['Nunito',sans-serif]">
-          Error loading wallets: {error.message}
+          Error loading customers: {error.message}
         </div>
       </div>
     );
   }
 
-  const wallets = data?.data || [];
+  const customers = data?.data || [];
   const metrics = data?.metrics || {};
   const total = data?.total || 0;
 
   // Map API data to component format
-  const walletData: WalletData[] = wallets.map((wallet: any) => ({
-    id: wallet.id,
-    customerName: wallet.customerName,
-    flag: currencyFlagMap[wallet.currency] || flagEUR,
-    currency: wallet.currencySymbol,
-    balance1: wallet.balance1,
-    balance2: wallet.balance2,
-    balance3: wallet.balance3,
-    status: wallet.status as WalletStatus,
-    dateCreated: wallet.dateCreated,
-    lastActivity: wallet.lastActivity,
+  const CUSTOMERS_DATA = customers.map((customer: any) => ({
+    id: customer.id,
+    flag: customer.nationality?.flag,
+    name: customer.name,
+    email: customer.email,
+    phone: customer.phone,
+    status: customer.status,
+    pnd: customer.pnd,
+    dateCreated: customer.dateCreated,
+    kycStatus: customer.kycStatus,
+    reference: customer.reference,
   }));
 
   return (
@@ -150,32 +174,32 @@ export default function Wallets() {
       {/* Metrics Container */}
       <div className="grid grid-cols-4 gap-6 px-6">
         <MetricCard
-          icon={walletsMetricIcon}
+          icon={totalCustomersIcon}
           iconBg="bg-[#00c7be]"
           iconBorder="border-[#00e2d8]"
-          title="Total Wallets"
-          value={String(metrics.totalWallets || total)}
+          title="Total Customers"
+          value={String(metrics.totalCustomers || total)}
         />
         <MetricCard
-          icon={transactionsIcon}
+          icon={activeCustomersIcon}
           iconBg="bg-[#0040c1]"
           iconBorder="border-[#004eeb]"
-          title="Total Value"
-          value="₦2.4B"
+          title="Active Customers"
+          value={String(metrics.activeCustomers || 0)}
         />
         <MetricCard
-          icon={uptimeIcon}
+          icon={activeCustomersIcon}
           iconBg="bg-[#085d3a]"
           iconBorder="border-[#067647]"
-          title="Active Wallets"
-          value={String(walletData.filter(w => w.status === "Active").length)}
+          title="Inactive Customers"
+          value={String(total - (metrics.activeCustomers || 0))}
         />
         <MetricCard
-          icon={walletsMetricIcon}
+          icon={newCustomersIcon}
           iconBg="bg-[#93370d]"
           iconBorder="border-[#b54708]"
-          title="Pending Transactions"
-          value={metrics.totalTransactions || "0"}
+          title="New Customers"
+          value={String(metrics.newCustomers || 0)}
         />
       </div>
 
@@ -185,35 +209,53 @@ export default function Wallets() {
           {/* Table Header */}
           <div className="border-[#313131] border-b-[0.5px] border-solid flex items-center justify-between gap-6 p-4">
             <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#f7f7f7] text-base tracking-[0.024px]">
-              All Wallets
+              All Customers
             </p>
-            <div className="flex-1 max-w-md">
+            <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md">
               <div className="bg-[#181818] border-[#717171] border-[0.5px] border-solid flex gap-2 items-center p-4 rounded-xl">
-                <svg className="size-5" viewBox="0 0 20 20" fill="none">
-                  <path
-                    d="M9.0625 15.625C12.6869 15.625 15.625 12.6869 15.625 9.0625C15.625 5.43813 12.6869 2.5 9.0625 2.5C5.43813 2.5 2.5 5.43813 2.5 9.0625C2.5 12.6869 5.43813 15.625 9.0625 15.625Z"
-                    stroke="#717171"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M13.7031 14.0781L17.5 17.8656"
-                    stroke="#717171"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <button
+                  type="submit"
+                  className="size-5 flex items-center justify-center hover:opacity-80 transition-opacity"
+                >
+                  <svg className="size-5" viewBox="0 0 20 20" fill="none">
+                    <path
+                      d="M9.0625 15.625C12.6869 15.625 15.625 12.6869 15.625 9.0625C15.625 5.43813 12.6869 2.5 9.0625 2.5C5.43813 2.5 2.5 5.43813 2.5 9.0625C2.5 12.6869 5.43813 15.625 9.0625 15.625Z"
+                      stroke="#717171"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M13.7031 14.0781L17.5 17.8656"
+                      stroke="#717171"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
                 <input
                   type="text"
-                  placeholder="Search wallets..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by email, phone, or reference... (Press Enter)"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   className="bg-transparent font-['Nunito',sans-serif] font-normal flex-1 leading-[22.4px] outline-none text-sm text-[#a2a2a2] tracking-[-0.28px]"
                 />
+                {searchInput && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchInput("");
+                      setSearchTerm("");
+                      setPage(1);
+                    }}
+                    className="text-[#a2a2a2] hover:text-[#f7f7f7] text-xs px-2 py-1 rounded hover:bg-[#313131] transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
-            </div>
+            </form>
             <div className="flex gap-4 items-center">
               <button className="bg-[#494949] flex gap-2 items-center justify-center px-5 py-3 rounded-full">
                 <svg
@@ -241,7 +283,7 @@ export default function Wallets() {
                   />
                 </svg>
                 <p className="font-['Nunito',sans-serif] font-semibold leading-[14.4px] text-[#a2a2a2] text-xs tracking-[0.12px]">
-                  All Status
+                  Filter
                 </p>
                 <svg className="size-4" viewBox="0 0 16 16" fill="none">
                   <path
@@ -271,17 +313,22 @@ export default function Wallets() {
                   </div>
                   <div className="flex-1 bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3">
                     <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
-                      Balance
+                      Email Address
                     </p>
                   </div>
-                  <div className="basis-0 bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center grow min-h-px min-w-px px-4 py-3 relative shrink-0">
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[140px]">
                     <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
-                      Balance
+                      Phone Number
                     </p>
                   </div>
-                  <div className="basis-0 bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center grow min-h-px min-w-px px-4 py-3 relative shrink-0">
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[140px]">
                     <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm tracking-[-0.28px]">
-                      Balance
+                      Date Created
+                    </p>
+                  </div>
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[80px]">
+                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm tracking-[-0.28px]">
+                      PND
                     </p>
                   </div>
                   <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[124px]">
@@ -289,14 +336,9 @@ export default function Wallets() {
                       Status
                     </p>
                   </div>
-                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[164px]">
+                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[140px]">
                     <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
-                      Date Created
-                    </p>
-                  </div>
-                  <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center px-4 py-3 relative shrink-0 w-[112px]">
-                    <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] relative shrink-0 text-[#a2a2a2] text-sm tracking-[-0.28px]">
-                      Last Activity
+                      KYC Status
                     </p>
                   </div>
                   <div className="bg-[#313131] box-border content-stretch flex items-center px-4 py-3 relative shrink-0 w-[80px]">
@@ -307,125 +349,206 @@ export default function Wallets() {
                 </div>
 
                 {/* Table Rows */}
-                <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                  {walletData.map((wallet, index) => {
-                    const statusStyles = getStatusStyles(wallet.status);
-                    const isEvenRow = index % 2 === 1;
-                    return (
-                      <div
-                        key={wallet.id}
-                        className={`${
-                          isEvenRow ? "bg-[rgba(10,10,10,0.2)]" : ""
-                        } border-[#0a0a0a] border-b-[0.5px] border-solid box-border content-stretch flex h-10 items-start relative shrink-0 w-full`}
-                      >
-                        <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0">
-                          <img
-                            src={wallet.flag}
-                            alt="flag"
-                            className="relative shrink-0 size-5"
-                          />
-                        </div>
-                        <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[252px]">
-                          <p
-                            onClick={() => navigate({ to: `/wallets/${wallet.id}` })}
-                            className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[22.4px] min-h-px min-w-px overflow-ellipsis overflow-hidden relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px] cursor-pointer hover:text-[#f7f7f7] transition-colors"
+                {isLoading ? (
+                  <div className="border-t border-[#0a0a0a] flex items-center justify-center py-16">
+                    <div className="text-center">
+                      <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00c7be] mb-4"></div>
+                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm">
+                        Loading customers...
+                      </p>
+                    </div>
+                  </div>
+                ) : CUSTOMERS_DATA.length === 0 ? (
+                  <div className="border-t border-[#0a0a0a] flex items-center justify-center py-16">
+                    <div className="text-center">
+                      <p className="font-['Nunito',sans-serif] font-semibold leading-[25.6px] text-[#f7f7f7] text-base mb-2">
+                        No customers found
+                      </p>
+                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm">
+                        Try adjusting your search or filter criteria
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                    {CUSTOMERS_DATA.map((customer: any, index: number) => {
+                      const statusStyles = getStatusStyles(customer.status);
+                      const kycStyles = getKycStyles(customer.kycStatus);
+                      const isEvenRow = index % 2 === 1;
+                      return (
+                        <div
+                          key={customer.id || index}
+                          className={`${
+                            isEvenRow ? "bg-[rgba(10,10,10,0.2)]" : ""
+                          } border-[#0a0a0a] border-b-[0.5px] border-solid box-border content-stretch flex h-10 items-start relative shrink-0 w-full`}
+                        >
+                          <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0">
+                            {customer.flag && (
+                              <img
+                                src={customer.flag}
+                                alt="flag"
+                                className="relative shrink-0 size-5"
+                              />
+                            )}
+                          </div>
+                          <button
+                            onClick={() =>
+                              navigate({ to: `/wallets/${customer.reference}` })
+                            }
+                            className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-start min-h-10 px-4 py-2 relative shrink-0 w-[252px] hover:bg-[rgba(10,10,10,0.2)] transition-colors"
                           >
-                            {wallet.customerName}
-                          </p>
-                        </div>
-                        <div className="basis-0 border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex font-['Nunito',sans-serif] font-normal gap-1 grow items-center leading-[22.4px] min-h-10 min-w-px px-4 py-2 relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                          <p className="overflow-ellipsis overflow-hidden relative shrink-0">
-                            {wallet.currency}
-                          </p>
-                          <p className="overflow-ellipsis overflow-hidden relative shrink-0">
-                            {wallet.balance1}
-                          </p>
-                        </div>
-                        <div className="basis-0 border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex font-['Nunito',sans-serif] font-normal gap-1 grow items-center leading-[22.4px] min-h-10 min-w-px px-4 py-2 relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                          <p className="overflow-ellipsis overflow-hidden relative shrink-0">
-                            {wallet.currency}
-                          </p>
-                          <p className="overflow-ellipsis overflow-hidden relative shrink-0">
-                            {wallet.balance2}
-                          </p>
-                        </div>
-                        <div className="basis-0 border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex font-['Nunito',sans-serif] font-normal gap-1 grow items-center leading-[22.4px] min-h-10 min-w-px px-4 py-2 relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                          <p className="overflow-ellipsis overflow-hidden relative shrink-0">
-                            {wallet.currency}
-                          </p>
-                          <p className="overflow-ellipsis overflow-hidden relative shrink-0">
-                            {wallet.balance3}
-                          </p>
-                        </div>
-                        <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[124px]">
-                          <div
-                            className={`${statusStyles.bg} ${statusStyles.border} border-[0.5px] border-solid box-border content-stretch flex gap-1 items-center justify-center px-3 py-[2px] relative rounded-full shrink-0`}
-                          >
-                            <p
-                              className={`font-['Nunito',sans-serif] font-medium leading-[19.2px] overflow-ellipsis overflow-hidden relative shrink-0 text-xs ${statusStyles.text} text-nowrap tracking-[0.48px]`}
-                            >
-                              {wallet.status}
+                            <p className="basis-0 font-['Nunito',sans-serif] font-normal grow leading-[22.4px] min-h-px min-w-px overflow-ellipsis overflow-hidden relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px] hover:text-[#f7f7f7]">
+                              {customer.name}
+                            </p>
+                          </button>
+                          <div className="basis-0 border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex grow items-center min-h-10 min-w-px px-4 py-2 relative shrink-0">
+                            <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                              {customer.email}
                             </p>
                           </div>
-                        </div>
-                        <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[164px]">
-                          <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                            {wallet.dateCreated}
-                          </p>
-                        </div>
-                        <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[112px]">
-                          <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden relative shrink-0 text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                            {wallet.lastActivity}
-                          </p>
-                        </div>
-                        <div className="box-border content-stretch flex items-center justify-center min-h-10 px-4 py-2 relative shrink-0 w-[80px]">
-                          <svg
-                            className="relative shrink-0 size-4"
-                            viewBox="0 0 16 16"
-                            fill="none"
+                          <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[140px]">
+                            <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                              {customer.phone}
+                            </p>
+                          </div>
+                          <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[140px]">
+                            <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                              {customer.dateCreated}
+                            </p>
+                          </div>
+                          <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center justify-center min-h-10 px-4 py-2 relative shrink-0 w-[80px]">
+                            <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-sm text-[#a2a2a2]">
+                              {customer.pnd ? "Yes" : "No"}
+                            </p>
+                          </div>
+                          <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[124px]">
+                            <div
+                              className={`${statusStyles.className} border-[0.5px] border-solid box-border content-stretch flex gap-1 items-center justify-center px-3 py-[2px] relative rounded-full shrink-0 min-w-[80px]`}
+                            >
+                              <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] overflow-ellipsis overflow-hidden relative shrink-0 text-xs text-nowrap tracking-[0.48px]">
+                                {statusStyles.text}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="border-[#0a0a0a] border-r-[0.5px] border-solid box-border content-stretch flex items-center min-h-10 px-4 py-2 relative shrink-0 w-[140px]">
+                            <div
+                              className={`${kycStyles.className} border-[0.5px] border-solid box-border content-stretch flex gap-1 items-center justify-center px-3 py-[2px] relative rounded-full shrink-0 min-w-[80px]`}
+                            >
+                              <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] overflow-ellipsis overflow-hidden relative shrink-0 text-xs text-nowrap tracking-[0.48px]">
+                                {kycStyles.text}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() =>
+                              navigate({ to: `/wallets/${customer.id}` })
+                            }
+                            className="box-border content-stretch flex items-center justify-center min-h-10 px-4 py-2 relative shrink-0 w-[80px] hover:bg-[rgba(10,10,10,0.2)] transition-colors"
                           >
-                            <circle
-                              cx="8"
-                              cy="3.33333"
-                              r="1.33333"
-                              fill="#a2a2a2"
-                            />
-                            <circle cx="8" cy="8" r="1.33333" fill="#a2a2a2" />
-                            <circle
-                              cx="8"
-                              cy="12.6667"
-                              r="1.33333"
-                              fill="#a2a2a2"
-                            />
-                          </svg>
+                            <svg
+                              className="relative shrink-0 size-4"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                            >
+                              <circle
+                                cx="8"
+                                cy="3.33333"
+                                r="1.33333"
+                                fill="#a2a2a2"
+                              />
+                              <circle
+                                cx="8"
+                                cy="8"
+                                r="1.33333"
+                                fill="#a2a2a2"
+                              />
+                              <circle
+                                cx="8"
+                                cy="12.6667"
+                                r="1.33333"
+                                fill="#a2a2a2"
+                              />
+                            </svg>
+                          </button>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Pagination */}
                 <div className="box-border content-stretch flex gap-6 items-center px-0 py-2 relative shrink-0 w-full">
                   <div className="basis-0 box-border content-stretch flex grow items-center min-h-px min-w-px px-4 py-3 relative shrink-0">
                     <p className="font-['Nunito',sans-serif] font-medium leading-[19.2px] relative shrink-0 text-[#494949] text-xs tracking-[0.48px]">
-                      Showing {walletData.length} of {total} Wallets
+                      Showing {CUSTOMERS_DATA.length} of {total} Customers
                     </p>
+                  </div>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowLimitDropdown(!showLimitDropdown)}
+                      className="bg-[#494949] flex gap-2 items-center justify-center px-3 py-1.5 rounded-full whitespace-nowrap"
+                    >
+                      <p className="font-['Nunito',sans-serif] font-semibold leading-[14.4px] text-[#a2a2a2] text-xs tracking-[0.12px]">
+                        {limit} per page
+                      </p>
+                      <img src={arrowDown} className="size-4" />
+                    </button>
+                    {showLimitDropdown && (
+                      <div className="absolute bottom-full mb-2 left-0 bg-[#313131] border border-[#494949] rounded-lg z-10">
+                        {[10, 25, 50, 100].map((value) => (
+                          <button
+                            key={value}
+                            onClick={() => {
+                              setLimit(value);
+                              setPage(1);
+                              setShowLimitDropdown(false);
+                            }}
+                            className={`px-4 py-2 text-xs w-full text-left hover:bg-[#494949] ${
+                              limit === value
+                                ? "text-[#f7f7f7]"
+                                : "text-[#a2a2a2]"
+                            }`}
+                          >
+                            {value} per page
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="box-border content-stretch flex gap-4 items-center justify-end px-4 py-0 relative shrink-0 w-[277px]">
                     <button
-                      disabled
-                      className="border-[#494949] border-[1px] border-solid opacity-30 relative rounded-full shrink-0 px-4 py-2"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className={`border-[#494949] border-[1px] border-solid relative rounded-full shrink-0 px-4 py-2 ${
+                        page === 1 ? "opacity-30" : "cursor-pointer"
+                      }`}
                     >
                       <p className="font-['Nunito',sans-serif] font-normal leading-[14.4px] relative shrink-0 text-[#494949] text-xs tracking-[0.12px]">
                         Previous
                       </p>
                     </button>
                     <div className="content-stretch flex font-['Nunito',sans-serif] font-medium gap-2 items-center leading-[19.2px] relative shrink-0 text-xs text-nowrap tracking-[0.48px]">
-                      <p className="relative shrink-0 text-[#f7f7f7]">01</p>
+                      <p className="relative shrink-0 text-[#f7f7f7]">
+                        {String(page).padStart(2, "0")}
+                      </p>
                       <p className="relative shrink-0 text-[#494949]">of</p>
-                      <p className="relative shrink-0 text-[#494949]">12</p>
+                      <p className="relative shrink-0 text-[#494949]">
+                        {String(Math.ceil(total / limit) || 1).padStart(2, "0")}
+                      </p>
                     </div>
-                    <button className="border-[#494949] border-[1px] border-solid cursor-pointer relative rounded-full shrink-0 px-4 py-2">
+                    <button
+                      onClick={() =>
+                        setPage((p) =>
+                          Math.min(Math.ceil(total / limit), p + 1)
+                        )
+                      }
+                      disabled={page >= Math.ceil(total / limit)}
+                      className={`border-[#494949] border-[1px] border-solid relative rounded-full shrink-0 px-4 py-2 ${
+                        page >= Math.ceil(total / limit)
+                          ? "opacity-30"
+                          : "cursor-pointer"
+                      }`}
+                    >
                       <p className="font-['Nunito',sans-serif] font-normal leading-[14.4px] relative shrink-0 text-[#494949] text-xs tracking-[0.12px]">
                         Next
                       </p>

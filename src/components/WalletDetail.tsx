@@ -10,500 +10,6 @@ import arrowDown from "../assets/icons/arrow-down-icon.svg";
 import filterIcon from "../assets/icons/filter.svg";
 import searchIcon from "../assets/icons/search.svg";
 import arrowDownBlack from "../assets/icons/arrow-down-black-icon.svg";
-import flagEUR from "../assets/icons/flags/EUR.svg";
-import flagGHA from "../assets/icons/flags/GHA.svg";
-import flagCHE from "../assets/icons/flags/CHE.svg";
-import flagGBR from "../assets/icons/flags/GBR.svg";
-import flagUGA from "../assets/icons/flags/UGA.svg";
-import flagCAN from "../assets/icons/flags/CAN.svg";
-import flagAUS from "../assets/icons/flags/AUS.svg";
-import flagJPN from "../assets/icons/flags/JPN.svg";
-import flagRWA from "../assets/icons/flags/RWA.svg";
-import flagUSA from "../assets/icons/flags/USA.svg";
-import flagNGN from "../assets/icons/flags/NGN.svg";
-
-// Flag mapping for currencies
-const currencyFlagMap: Record<string, string> = {
-  NGN: flagNGN,
-  GBP: flagGBR,
-  USD: flagUSA,
-  EUR: flagEUR,
-  CAD: flagCAN,
-  GHS: flagGHA,
-  CHF: flagCHE,
-  UGX: flagUGA,
-  AUD: flagAUS,
-  JPY: flagJPN,
-  RWF: flagRWA,
-};
-
-// Mock wallet data (kept for backward compatibility during transition)
-const walletDetailsDataOld: Record<
-  string,
-  {
-    customerName: string;
-    email: string;
-    walletId: string;
-    walletType: string;
-    subWallets: Array<{
-      id: string;
-      flag: string;
-      currency: string;
-      balance: string;
-    }>;
-    transactions: Array<{
-      service: string;
-      amount: string;
-      balance: string;
-      date: string;
-      time?: string;
-      referenceId?: string;
-      fee?: string;
-      openingBalance?: string;
-      status: TransactionStatus;
-    }>;
-  }
-> = {
-  "1": {
-    customerName: "Tunde Afolabi",
-    email: "tundeafolabi@gmail.com",
-    walletId: "WB9X3K2ZL7A4FJ8R0TQ1V5E6MNDCYS",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-7890-0001",
-        flag: flagNGN,
-        currency: "₦",
-        balance: "300,750.00",
-      },
-      {
-        id: "WLT-7890-0002",
-        flag: flagGBR,
-        currency: "£",
-        balance: "40,000.456",
-      },
-      {
-        id: "WLT-7890-0003",
-        flag: flagUSA,
-        currency: "$",
-        balance: "300,750.00",
-      },
-      {
-        id: "WLT-7890-0004",
-        flag: flagEUR,
-        currency: "€",
-        balance: "1,987,456.78",
-      },
-      {
-        id: "WLT-7890-0005",
-        flag: flagCAN,
-        currency: "$",
-        balance: "147,765.873",
-      },
-      {
-        id: "WLT-7890-0006",
-        flag: flagNGN,
-        currency: "₦",
-        balance: "32,456,789,456.89",
-      },
-      {
-        id: "WLT-7890-0007",
-        flag: flagGHA,
-        currency: "₵",
-        balance: "7,765,235.87",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        time: "13:58:34",
-        referenceId: "TRF-EUR-0001",
-        fee: "€25.00",
-        openingBalance: "€500,000.00",
-        status: "Processing",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        time: "10:12:05",
-        referenceId: "TRF-EUR-0002",
-        fee: "€25.00",
-        openingBalance: "€600,000.00",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        time: "09:01:11",
-        referenceId: "TRF-EUR-0003",
-        fee: "€25.00",
-        openingBalance: "€900,000.00",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        time: "08:43:50",
-        referenceId: "TRF-EUR-0004",
-        fee: "€25.00",
-        openingBalance: "€1,200,000.00",
-        status: "Failed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "€300,750.00",
-        balance: "€300,750.00",
-        date: "2024-10-02",
-        status: "Completed",
-      },
-    ],
-  },
-  "2": {
-    customerName: "Femi Ogunleye",
-    email: "femiogunleye@gmail.com",
-    walletId: "WB8Y2J1YK6Z3FI7Q9SP0U4D5LMCBXR",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-5540-0001",
-        flag: flagGHA,
-        currency: "GH₵",
-        balance: "55,400.00",
-      },
-      {
-        id: "WLT-5540-0002",
-        flag: flagUSA,
-        currency: "GH₵",
-        balance: "20,400.00",
-      },
-      {
-        id: "WLT-5540-0003",
-        flag: flagEUR,
-        currency: "GH₵",
-        balance: "15,000.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "GH₵55,400.00",
-        balance: "GH₵55,400.00",
-        date: "2024-09-30",
-        time: "14:22:01",
-        referenceId: "TRF-GHS-1001",
-        fee: "GH₵5.00",
-        openingBalance: "GH₵60,400.00",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "GH₵10,000.00",
-        balance: "GH₵45,400.00",
-        date: "2024-09-29",
-        status: "Completed",
-      },
-      {
-        service: "Withdrawal",
-        amount: "GH₵5,000.00",
-        balance: "GH₵40,400.00",
-        date: "2024-09-28",
-        status: "Completed",
-      },
-    ],
-  },
-  "3": {
-    customerName: "Zainab Ibrahim",
-    email: "zainabibrahim@gmail.com",
-    walletId: "WB7X1I0XJ5Y2EH6P8RO9T3C4KLBAWR",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-2250-0001",
-        flag: flagCHE,
-        currency: "CHf",
-        balance: "200,250.00",
-      },
-      {
-        id: "WLT-2250-0002",
-        flag: flagEUR,
-        currency: "CHf",
-        balance: "100,000.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "CHf200,250.00",
-        balance: "CHf200,250.00",
-        date: "2024-09-27",
-        time: "11:47:22",
-        referenceId: "TRF-CHF-2001",
-        fee: "CHf10.00",
-        openingBalance: "CHf300,250.00",
-        status: "Processing",
-      },
-      {
-        service: "Deposit",
-        amount: "CHf50,000.00",
-        balance: "CHf150,250.00",
-        date: "2024-09-26",
-        status: "Completed",
-      },
-    ],
-  },
-  "4": {
-    customerName: "Ijeoma Okeke",
-    email: "ijeomaokeke@gmail.com",
-    walletId: "WB6W0H9WI4X1DG5O7QN8S2B3JKAZUQ",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-4500-0001",
-        flag: flagGBR,
-        currency: "£",
-        balance: "45,000.00",
-      },
-      {
-        id: "WLT-4500-0002",
-        flag: flagUSA,
-        currency: "£",
-        balance: "25,000.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "£45,000.00",
-        balance: "£45,000.00",
-        date: "2024-09-30",
-        time: "16:10:45",
-        referenceId: "TRF-GBP-3001",
-        fee: "£12.00",
-        openingBalance: "£90,000.00",
-        status: "Completed",
-      },
-      {
-        service: "Transfer",
-        amount: "£15,000.00",
-        balance: "£30,000.00",
-        date: "2024-09-29",
-        status: "Completed",
-      },
-    ],
-  },
-  "5": {
-    customerName: "Adaobi Eze",
-    email: "adaobieze@gmail.com",
-    walletId: "WB5V9G8VH3W0CF4N6PM7R1A2IJAYTQ",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-1300-0001",
-        flag: flagUGA,
-        currency: "USh",
-        balance: "130,000.00",
-      },
-      {
-        id: "WLT-1300-0002",
-        flag: flagUSA,
-        currency: "USh",
-        balance: "80,000.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "USh130,000.00",
-        balance: "USh130,000.00",
-        date: "2024-10-01",
-        time: "12:00:00",
-        referenceId: "TRF-UGX-4001",
-        fee: "USh1,000.00",
-        openingBalance: "USh260,000.00",
-        status: "Completed",
-      },
-    ],
-  },
-  "6": {
-    customerName: "Olumide Bakare",
-    email: "olumidebakare@gmail.com",
-    walletId: "WB4U8F7UG2V9BE3M5OL6Q0Z1HIXZSP",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-7890-0001",
-        flag: flagCAN,
-        currency: "C$",
-        balance: "78,900.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "C$78,900.00",
-        balance: "C$78,900.00",
-        date: "2024-10-03",
-        time: "15:30:10",
-        referenceId: "TRF-CAD-5001",
-        fee: "C$3.00",
-        openingBalance: "C$100,000.00",
-        status: "Processing",
-      },
-    ],
-  },
-  "7": {
-    customerName: "Bola Johnson",
-    email: "bolajohnson@gmail.com",
-    walletId: "WB3T7E6TF1U8AD2L4NK5P9Y0GHWYRO",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-1560-0001",
-        flag: flagAUS,
-        currency: "A$",
-        balance: "150,600.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "A$150,600.00",
-        balance: "A$150,600.00",
-        date: "2024-10-04",
-        time: "07:45:55",
-        referenceId: "TRF-AUD-6001",
-        fee: "A$8.00",
-        openingBalance: "A$200,600.00",
-        status: "Completed",
-      },
-    ],
-  },
-  "8": {
-    customerName: "Emeka Uche",
-    email: "emekauche@gmail.com",
-    walletId: "WB2S6D5SE0T7ZC1K3MJ4O8X9FGVXQN",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-9000-0001",
-        flag: flagJPN,
-        currency: "¥",
-        balance: "90,000.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "¥90,000.00",
-        balance: "¥90,000.00",
-        date: "2024-09-29",
-        time: "19:20:01",
-        referenceId: "TRF-JPY-7001",
-        fee: "¥250.00",
-        openingBalance: "¥120,000.00",
-        status: "Completed",
-      },
-    ],
-  },
-  "9": {
-    customerName: "Jide Ojo",
-    email: "jideojo@gmail.com",
-    walletId: "WB1R5C4RD9S6YB0J2LI3N7W8EFUWPM",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-9999-0001",
-        flag: flagRWA,
-        currency: "RF",
-        balance: "99,999.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "RF99,999.00",
-        balance: "RF99,999.00",
-        date: "2024-09-29",
-        time: "09:09:09",
-        referenceId: "TRF-RWF-8001",
-        fee: "RF100.00",
-        openingBalance: "RF150,000.00",
-        status: "Completed",
-      },
-    ],
-  },
-  "10": {
-    customerName: "Kamari Okoro",
-    email: "kamariokoro@gmail.com",
-    walletId: "WB0Q4B3QC8R5XA9I1KH2M6V7DETVOL",
-    walletType: "BAAS",
-    subWallets: [
-      {
-        id: "WLT-9999-0001",
-        flag: flagUSA,
-        currency: "$",
-        balance: "99,999.00",
-      },
-    ],
-    transactions: [
-      {
-        service: "Transfer",
-        amount: "$99,999.00",
-        balance: "$99,999.00",
-        date: "2024-09-29",
-        time: "18:18:18",
-        referenceId: "TRF-USD-9001",
-        fee: "$5.00",
-        openingBalance: "$150,000.00",
-        status: "Completed",
-      },
-    ],
-  },
-};
 
 type TransactionStatus = "Processing" | "Completed" | "Failed";
 
@@ -553,6 +59,50 @@ export default function WalletDetail() {
     },
   });
 
+  const {
+    data: transfersData,
+    isLoading: transfersLoading,
+    error: transfersError,
+  } = useQuery({
+    queryKey: ["transfers", id, selectedWallet],
+    queryFn: async () => {
+      if (!data?.data?.subWallets?.[selectedWallet]?.id) {
+        return { success: true, data: [], meta: { pagination: { page: 1, limit: 25 } } };
+      }
+      const walletId = data.data.subWallets[selectedWallet].id;
+      const response = await fetch(`/api/wallets/${walletId}/transfers`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch transfers");
+      }
+      return response.json();
+    },
+    enabled: !!data?.data?.subWallets?.[selectedWallet]?.id && activeTab === "transfers",
+  });
+
+  const {
+    data: withdrawalsData,
+    isLoading: withdrawalsLoading,
+    error: withdrawalsError,
+  } = useQuery({
+    queryKey: ["withdrawals", id, selectedWallet],
+    queryFn: async () => {
+      if (!data?.data?.subWallets?.[selectedWallet]?.id) {
+        return { success: true, data: [], meta: { pagination: { page: 1, limit: 25 } } };
+      }
+      const walletId = data.data.subWallets[selectedWallet].id;
+      const response = await fetch(`/api/wallets/${walletId}/withdrawals`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch withdrawals");
+      }
+      return response.json();
+    },
+    enabled: !!data?.data?.subWallets?.[selectedWallet]?.id && activeTab === "withdrawals",
+  });
+
+  console.log("data", data);
+  console.log("transfersData", transfersData);
+  console.log("withdrawalsData", withdrawalsData);
+
   if (isLoading) {
     return (
       <div className="bg-neutral-950 relative size-full min-h-screen flex items-center justify-center">
@@ -584,12 +134,6 @@ export default function WalletDetail() {
   }
 
   const walletData = data.data;
-
-  // Map subWallets to include flags
-  const subWalletsWithFlags = walletData.subWallets.map((sw: any) => ({
-    ...sw,
-    flag: currencyFlagMap[sw.currencyCode] || flagEUR,
-  }));
 
   return (
     <div className="bg-neutral-950 relative size-full min-h-screen pb-10">
@@ -640,12 +184,6 @@ export default function WalletDetail() {
                 <p className="font-['Nunito',sans-serif] font-semibold leading-[28.8px] text-[#f7f7f7] text-2xl text-nowrap tracking-[0.24px]">
                   {walletData.customerName}
                 </p>
-                <div className="bg-[#007aff] flex gap-2 items-center justify-center px-4 py-1 rounded-full">
-                  <img src={BankIcon} />
-                  <p className="font-['Nunito',sans-serif] font-bold leading-[21px] text-white text-sm">
-                    {walletData.walletType}
-                  </p>
-                </div>
               </div>
             </div>
             <div className="flex gap-8 items-center">
@@ -754,7 +292,7 @@ export default function WalletDetail() {
                 className="flex flex-col overflow-y-auto"
                 style={{ maxHeight: "598px" }}
               >
-                {subWalletsWithFlags.map((wallet: any, index: number) => (
+                {walletData.subWallets.map((wallet: any, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedWallet(index)}
@@ -767,12 +305,20 @@ export default function WalletDetail() {
                     <div className="flex gap-2 items-center w-full">
                       <img src={wallet.flag} className="size-5" />
                       <p className="font-['Nunito',sans-serif] font-normal flex leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#f7f7f7] text-nowrap tracking-[-0.28px]">
-                        {wallet.id}
+                        {wallet.title}
                       </p>
                     </div>
-                    <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-xs">
-                      {wallet.currency} {wallet.balance}
-                    </p>
+                    <div className="flex gap-2 items-center justify-between w-full">
+                      <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-xs">
+                        {wallet.currency} {wallet.balance}
+                      </p>
+                      <div className="bg-[#007aff] flex gap-2 items-center justify-center px-2 py-1 rounded-full">
+                        <img src={BankIcon} className="size-4" />
+                        <p className="font-['Nunito',sans-serif] font-bold text-white text-xs">
+                          {wallet.environment}
+                        </p>
+                      </div>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -819,7 +365,7 @@ export default function WalletDetail() {
                 {/* Header */}
                 <div className="border-[#313131] border-b-[0.5px] border-solid flex gap-4 justify-between items-center px-4 py-6">
                   <p className="font-['Nunito',sans-serif] font-normal leading-[25.6px] text-[#f7f7f7] text-base tracking-[0.024px] whitespace-nowrap">
-                    Transfers Statement
+                    {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Statement
                   </p>
                   <div className="flex gap-4 items-center">
                     <div className="bg-[#181818] border-[#717171] border-[0.5px] border-solid flex gap-2 items-center px-4 py-3 rounded-xl flex-1 min-w-[100px]">
@@ -872,7 +418,7 @@ export default function WalletDetail() {
                         </div>
                         <div className="flex-1 bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3">
                           <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] text-[#a2a2a2] text-sm tracking-[-0.28px]">
-                            Balance
+                            Recipient
                           </p>
                         </div>
                         <div className="bg-[#313131] border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center px-4 py-3 w-[140px]">
@@ -894,86 +440,217 @@ export default function WalletDetail() {
 
                       {/* Table Rows */}
                       <div className="flex flex-col">
-                        {walletData.transactions.map((transaction, index) => {
-                          const statusStyles = getStatusStyles(
-                            transaction.status
-                          );
-                          const isEvenRow = index % 2 === 1;
-                          return (
-                            <div
-                              key={index}
-                              className={`${
-                                isEvenRow ? "bg-[rgba(10,10,10,0.2)]" : ""
-                              } border-[#0a0a0a] border-b-[0.5px] border-solid flex h-10 items-start`}
-                            >
-                              <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
-                                <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                                  {transaction.service}
-                                </p>
-                              </div>
-                              <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
-                                <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                                  {transaction.amount}
-                                </p>
-                              </div>
-                              <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
-                                <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                                  {transaction.balance}
-                                </p>
-                              </div>
-                              <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[140px]">
-                                <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
-                                  {transaction.date}
-                                </p>
-                              </div>
-                              <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[132px]">
-                                <div
-                                  className={`${statusStyles.bg} ${statusStyles.border} border-[0.5px] border-solid flex gap-1 items-center justify-center px-3 py-[2px] rounded-full`}
-                                >
-                                  <p
-                                    className={`font-['Nunito',sans-serif] font-medium leading-[19.2px] overflow-ellipsis overflow-hidden text-xs ${statusStyles.text} text-nowrap tracking-[0.48px]`}
-                                  >
-                                    {transaction.status}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center justify-center min-h-10 px-4 py-2 w-[80px]">
-                                <button
-                                  aria-label="View receipt"
-                                  onClick={() => {
-                                    setReceiptData({
-                                      service: transaction.service,
-                                      amount: transaction.amount,
-                                      date: transaction.date,
-                                      time: transaction.time,
-                                      fee: transaction.fee,
-                                      openingBalance:
-                                        transaction.openingBalance,
-                                      closingBalance: transaction.balance,
-                                      referenceId: transaction.referenceId,
-                                      status: transaction.status,
-                                    });
-                                    setShowReceipt(true);
-                                  }}
-                                >
-                                  <svg
-                                    className="size-5 cursor-pointer"
-                                    viewBox="0 0 20 20"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M7.5 14.1667L12.5 9.16667L7.5 4.16667"
-                                      stroke="#a2a2a2"
-                                      strokeWidth="1.5"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                </button>
-                              </div>
+                        {activeTab === "transfers" ? (
+                          transfersLoading ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-sm">
+                                Loading transfers...
+                              </p>
                             </div>
-                          );
-                        })}
+                          ) : transfersError ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#912018] text-sm">
+                                Error loading transfers
+                              </p>
+                            </div>
+                          ) : !transfersData?.data || transfersData.data.length === 0 ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-sm">
+                                No transfers found
+                              </p>
+                            </div>
+                          ) : (
+                            transfersData.data.map(
+                              (transfer: any, index: number) => {
+                                const statusStyles = getStatusStyles(
+                                  transfer.status
+                                );
+                                const isEvenRow = index % 2 === 1;
+                                return (
+                                  <div
+                                    key={transfer.id || index}
+                                    className={`${
+                                      isEvenRow ? "bg-[rgba(10,10,10,0.2)]" : ""
+                                    } border-[#0a0a0a] border-b-[0.5px] border-solid flex h-10 items-start`}
+                                  >
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {transfer.service}
+                                      </p>
+                                    </div>
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {transfer.amount}
+                                      </p>
+                                    </div>
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {transfer.recipient?.name || "N/A"}
+                                      </p>
+                                    </div>
+                                    <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[140px]">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {transfer.date}
+                                      </p>
+                                    </div>
+                                    <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[132px]">
+                                      <div
+                                        className={`${statusStyles.bg} ${statusStyles.border} border-[0.5px] border-solid flex gap-1 items-center justify-center px-3 py-[2px] rounded-full`}
+                                      >
+                                        <p
+                                          className={`font-['Nunito',sans-serif] font-medium leading-[19.2px] overflow-ellipsis overflow-hidden text-xs ${statusStyles.text} text-nowrap tracking-[0.48px]`}
+                                        >
+                                          {transfer.status}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center justify-center min-h-10 px-4 py-2 w-[80px]">
+                                      <button
+                                        aria-label="View receipt"
+                                        onClick={() => {
+                                          setReceiptData({
+                                            service: transfer.service,
+                                            amount: transfer.amount,
+                                            date: transfer.date,
+                                            time: transfer.time,
+                                            fee: transfer.fee,
+                                            openingBalance: "N/A",
+                                            closingBalance: "N/A",
+                                            referenceId: transfer.reference,
+                                            status: transfer.status,
+                                          });
+                                          setShowReceipt(true);
+                                        }}
+                                      >
+                                        <svg
+                                          className="size-5 cursor-pointer"
+                                          viewBox="0 0 20 20"
+                                          fill="none"
+                                        >
+                                          <path
+                                            d="M7.5 14.1667L12.5 9.16667L7.5 4.16667"
+                                            stroke="#a2a2a2"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )
+                          )
+                        ) : activeTab === "withdrawals" ? (
+                          withdrawalsLoading ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-sm">
+                                Loading withdrawals...
+                              </p>
+                            </div>
+                          ) : withdrawalsError ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#912018] text-sm">
+                                Error loading withdrawals
+                              </p>
+                            </div>
+                          ) : !withdrawalsData?.data || withdrawalsData.data.length === 0 ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-sm">
+                                No withdrawals found
+                              </p>
+                            </div>
+                          ) : (
+                            withdrawalsData.data.map(
+                              (withdrawal: any, index: number) => {
+                                const statusStyles = getStatusStyles(
+                                  withdrawal.status
+                                );
+                                const isEvenRow = index % 2 === 1;
+                                return (
+                                  <div
+                                    key={withdrawal.id || index}
+                                    className={`${
+                                      isEvenRow ? "bg-[rgba(10,10,10,0.2)]" : ""
+                                    } border-[#0a0a0a] border-b-[0.5px] border-solid flex h-10 items-start`}
+                                  >
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {withdrawal.service}
+                                      </p>
+                                    </div>
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {withdrawal.amount}
+                                      </p>
+                                    </div>
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {withdrawal.recipient?.name || "N/A"}
+                                      </p>
+                                    </div>
+                                    <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[140px]">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {withdrawal.date}
+                                      </p>
+                                    </div>
+                                    <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[132px]">
+                                      <div
+                                        className={`${statusStyles.bg} ${statusStyles.border} border-[0.5px] border-solid flex gap-1 items-center justify-center px-3 py-[2px] rounded-full`}
+                                      >
+                                        <p
+                                          className={`font-['Nunito',sans-serif] font-medium leading-[19.2px] overflow-ellipsis overflow-hidden text-xs ${statusStyles.text} text-nowrap tracking-[0.48px]`}
+                                        >
+                                          {withdrawal.status}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center justify-center min-h-10 px-4 py-2 w-[80px]">
+                                      <button
+                                        aria-label="View receipt"
+                                        onClick={() => {
+                                          setReceiptData({
+                                            service: withdrawal.service,
+                                            amount: withdrawal.amount,
+                                            date: withdrawal.date,
+                                            time: withdrawal.time,
+                                            fee: withdrawal.fee,
+                                            openingBalance: "N/A",
+                                            closingBalance: "N/A",
+                                            referenceId: withdrawal.reference,
+                                            status: withdrawal.status,
+                                          });
+                                          setShowReceipt(true);
+                                        }}
+                                      >
+                                        <svg
+                                          className="size-5 cursor-pointer"
+                                          viewBox="0 0 20 20"
+                                          fill="none"
+                                        >
+                                          <path
+                                            d="M7.5 14.1667L12.5 9.16667L7.5 4.16667"
+                                            stroke="#a2a2a2"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )
+                          )
+                        ) : (
+                          <div className="flex items-center justify-center py-8">
+                            <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-sm">
+                              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} data not available yet
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       {/* Pagination */}

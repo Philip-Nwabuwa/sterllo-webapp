@@ -22,6 +22,7 @@ app/routeTree.gen.ts
 .vinxi
 .output
 .tanstack
+.nitro
 app.config.timestamp_*.js
 
 # Editor directories and files

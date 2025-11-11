@@ -4,9 +4,8 @@ import { json } from "@tanstack/react-start";
 import apiClient, {
   createApiCredentials,
   initializeProductKeys,
-} from "../../../lib/api-client";
+} from "../../../../lib/api-client";
 import { encodeCredentials, encodeToBase64 } from "@/lib";
-import type { WalletApiResponse } from "@/types/api";
 
 // Track if keys are initialized
 let keysInitialized = false;
@@ -25,24 +24,26 @@ function parseCookies(cookieHeader: string | null): Record<string, string> {
   );
 }
 
-export const Route = createFileRoute("/api/wallets/$id")({
+export const Route = createFileRoute("/api/wallets/$id/transfers")({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
-        console.info("Fetching wallet details... @", request.url);
+        console.info("Fetching wallet transfers... @", request.url);
 
         const { id } = params;
-        console.log("ID:", id);
+        console.log("Wallet ID:", id);
 
         if (!id) {
           return json(
             {
               success: false,
-              error: "Wallet not found",
+              error: "Wallet ID is required",
             },
-            { status: 404 }
+            { status: 400 }
           );
         }
+
+        // Initialize product keys if not already done
         if (!keysInitialized) {
           try {
             await initializeProductKeys();
@@ -81,19 +82,22 @@ export const Route = createFileRoute("/api/wallets/$id")({
 
         const url = new URL(request.url);
 
+        // Extract query parameters
         const start_date = url.searchParams.get("start_date");
         const end_date = url.searchParams.get("end_date");
-        const reference = id as string;
+        const status = url.searchParams.get("status");
         const page = url.searchParams.get("page");
         const limit = url.searchParams.get("limit");
 
-        const queryParams: Record<string, any> = {};
+        // Build query params object
+        const queryParams: Record<string, any> = {
+          source: { wallet_key: id },
+        };
 
-        if (reference) {
-          queryParams.customer = { reference };
-        }
         if (start_date) queryParams.start_date = start_date;
         if (end_date) queryParams.end_date = end_date;
+        if (status) queryParams.status = status;
+
         if (page || limit) {
           queryParams.pagination = {};
           if (page) queryParams.pagination.page = Number(page);
@@ -116,28 +120,61 @@ export const Route = createFileRoute("/api/wallets/$id")({
         console.log("Query params:", queryParams);
 
         try {
-          const endpoint =
-            Object.keys(queryParams).length > 0
-              ? `1.0/Customers/Wallets/Fetch?payload=${encodeToBase64(queryParams)}`
-              : "1.0/Customers/Wallets/Fetch";
+          const endpoint = `1.0/Customers/Wallets/Payments/Transfers/Fetch?payload=${encodeToBase64(queryParams)}`;
 
-          const response = await apiClient.get<WalletApiResponse>(
-            endpoint,
-            undefined, // no params
-            { Credentials: credentialsHeader }
-          );
+          const response = await apiClient.get<{
+            code: number;
+            state: boolean;
+            message: string;
+            data: Array<{
+              id: string;
+              reference: string;
+              type: string;
+              mode: string;
+              category: string;
+              currency: {
+                name: string;
+                code: string;
+                symbol: string;
+                flag: string;
+              };
+              amount: number;
+              fee: number;
+              narration: string;
+              sender: {
+                name: string;
+                wallet: {
+                  reference: string;
+                  title: string;
+                };
+              };
+              recipient: {
+                name: string;
+                wallet: {
+                  reference: string;
+                  title: string;
+                };
+              };
+              status: string;
+              date_created: string;
+              date_modified?: string;
+            }>;
+            meta: {
+              pagination: {
+                page: number;
+                limit: number;
+              };
+            };
+          }>(endpoint, undefined, { Credentials: credentialsHeader });
+
+          console.log("response", response);
 
           // Handle "No data" response (code 2003) as success with empty data
           if (response.code === 2003) {
-            console.log("No wallet found");
+            console.log("No transfers found");
             return json({
+              success: true,
               data: [],
-              total: 0,
-              metrics: {
-                totalCustomers: 0,
-                activeCustomers: 0,
-                newCustomers: 0,
-              },
               meta: response.meta || {
                 pagination: {
                   page: 1,
@@ -149,56 +186,66 @@ export const Route = createFileRoute("/api/wallets/$id")({
 
           // Check if the request was successful
           if (response.code !== 2000) {
-            console.error("Failed to fetch wallet:", response.message);
-            return json(response, { status: 500 });
-          }
-
-          // Transform the API response to match the expected format
-          const wallets = response.data;
-
-          console.log("wallets", wallets);
-
-          if (!wallets || wallets.length === 0) {
+            console.error("Failed to fetch transfers:", response.message);
             return json(
               {
                 success: false,
-                error: "No wallets found",
+                error: response.message,
               },
-              { status: 404 }
+              { status: 500 }
             );
           }
 
-          // Get the first wallet to extract customer info
-          const primaryWallet = wallets[0];
-
-          // Transform data for the frontend
+          // Transform the API response to match the expected format
           const transformedData = {
             success: true,
-            data: {
-              customerName: primaryWallet.title,
-              email: primaryWallet.contacts.email_address,
-              phone: primaryWallet.contacts.phone_number,
-              walletId: primaryWallet.reference,
-              subWallets: wallets.map((wallet) => ({
-                id: wallet.reference,
-                title: wallet.title,
-                key: wallet.key,
-                environment: wallet.environment,
-                currencyCode: wallet.currency.code,
-                currency: wallet.currency.symbol,
-                balance: wallet.balances.available.toFixed(2),
-                actualBalance: wallet.balances.actual,
-                availableBalance: wallet.balances.available,
-                pendingBalance: wallet.balances.pending,
-                flag: wallet.currency.flag,
-              })),
-              transactions: [],
-            },
+            data: response.data.map((transfer) => ({
+              id: transfer.id,
+              reference: transfer.reference,
+              type: transfer.type,
+              mode: transfer.mode,
+              category: transfer.category,
+              service: `${transfer.type} - ${transfer.category}`,
+              currency: transfer.currency.symbol,
+              currencyCode: transfer.currency.code,
+              amount: `${transfer.currency.symbol}${transfer.amount.toFixed(2)}`,
+              fee: `${transfer.currency.symbol}${transfer.fee.toFixed(2)}`,
+              narration: transfer.narration,
+              sender: {
+                name: transfer.sender.name,
+                walletReference: transfer.sender.wallet.reference,
+                walletTitle: transfer.sender.wallet.title,
+              },
+              recipient: {
+                name: transfer.recipient.name,
+                walletReference: transfer.recipient.wallet.reference,
+                walletTitle: transfer.recipient.wallet.title,
+              },
+              status: transfer.status,
+              date: new Date(transfer.date_created).toLocaleDateString(
+                "en-US",
+                {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                }
+              ),
+              time: new Date(transfer.date_created).toLocaleTimeString(
+                "en-US",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              ),
+              dateCreated: transfer.date_created,
+              dateModified: transfer.date_modified,
+            })),
+            meta: response.meta,
           };
 
           return json(transformedData);
         } catch (error) {
-          console.error("Error fetching wallet:", error);
+          console.error("Error fetching transfers:", error);
           return json(
             {
               success: false,

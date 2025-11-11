@@ -112,6 +112,153 @@ export interface FetchCustomersQuery {
   };
 }
 
+export type WalletApiResponse = {
+  code: number;
+  state: boolean;
+  message: string;
+  data: Array<{
+    title: string;
+    key: string;
+    environment: string;
+    reference: string;
+    currency: {
+      name: string;
+      code: string;
+      category: string;
+      symbol: string;
+      flag: string;
+    };
+    contacts: {
+      email_address: string;
+      phone_number: string;
+    };
+    balances: {
+      actual: number;
+      available: number;
+      pending: number;
+      dispute: number;
+      locked: number;
+      limits: {
+        min: number;
+        max: number;
+        overdraft: {
+          max: number;
+          balance: {
+            used: number;
+            left: number;
+          };
+          access: boolean;
+          status: boolean;
+          contract_code: any;
+        };
+      };
+    };
+    limits: {
+      credit: {
+        range: {
+          min: number;
+          max: number;
+        };
+        duration: {
+          daily: {
+            value: number;
+            volume: number;
+          };
+          weekly: {
+            value: number;
+            volume: number;
+          };
+          monthly: {
+            value: number;
+            volume: number;
+          };
+        };
+        cumulative: {
+          total: {
+            value: number;
+            volume: number;
+          };
+          duration: {
+            daily: {
+              value: number;
+              volume: number;
+            };
+            weekly: {
+              value: number;
+              volume: number;
+            };
+            monthly: {
+              value: number;
+              volume: number;
+            };
+          };
+        };
+      };
+      debit: {
+        range: {
+          min: number;
+          max: number;
+        };
+        duration: {
+          daily: {
+            value: number;
+            volume: number;
+          };
+          weekly: {
+            value: number;
+            volume: number;
+          };
+          monthly: {
+            value: number;
+            volume: number;
+          };
+        };
+        cumulative: {
+          total: {
+            value: number;
+            volume: number;
+          };
+          duration: {
+            daily: {
+              value: number;
+              volume: number;
+            };
+            weekly: {
+              value: number;
+              volume: number;
+            };
+            monthly: {
+              value: number;
+              volume: number;
+            };
+          };
+        };
+      };
+    };
+    constraints: {
+      pnd: {
+        custom: boolean;
+        default: boolean;
+      };
+      pnc: {
+        custom: boolean;
+        default: boolean;
+      };
+      readonly: {
+        default: boolean;
+      };
+    };
+    date_created: string;
+    date_modified?: string;
+  }>;
+  meta: {
+    pagination: {
+      page: number;
+      limit: number;
+    };
+  };
+};
+
 // Enhanced Error Handling Types
 export type ErrorType =
   | "network"

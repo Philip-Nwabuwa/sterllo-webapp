@@ -136,11 +136,6 @@ export const Route = createFileRoute("/api/customers/")({
             { Credentials: credentialsHeader }
           );
 
-          console.log("API Response received:", {
-            code: response.code,
-            dataLength: response.data?.length,
-          });
-
           // Handle "No data" response (code 2003) as success with empty data
           if (response.code === 2003) {
             console.log("No customers found");

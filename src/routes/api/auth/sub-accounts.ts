@@ -14,18 +14,13 @@ export const Route = createFileRoute("/api/auth/sub-accounts")({
       GET: async ({ request }) => {
         console.info("Processing sub-accounts fetch request... @", request.url);
 
+        const ACCOUNT_PROXY_BASE_URL = process.env.ACCOUNT_PROXY_BASE_URL;
         try {
-          // Extract key and session_id from headers
           const key = request.headers.get("key");
           const session_id = request.headers.get("session_id");
 
-          // Validate the headers
           const validated = subAccountsSchema.parse({ key, session_id });
-
-          // Call the sub-accounts API
-          // Use 127.0.0.1 instead of localhost to avoid DNS resolution issues in Node.js
-          const subAccountsUrl =
-            "http://127.0.0.1:5001/api/v1/auth/sub-accounts/fetch";
+          const subAccountsUrl = `${ACCOUNT_PROXY_BASE_URL}/api/v1/auth/sub-accounts/fetch`;
 
           console.log("Calling sub-accounts API:", {
             url: subAccountsUrl,
@@ -37,9 +32,6 @@ export const Route = createFileRoute("/api/auth/sub-accounts")({
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
-              "User-Agent":
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-              Origin: "http://localhost:3000",
               key: validated.key,
               session_id: validated.session_id,
             },

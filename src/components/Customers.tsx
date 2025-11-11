@@ -401,13 +401,6 @@ export default function Customers() {
                   </div>
                 )}
               </div>
-              <button className="bg-[#fff] flex gap-2 items-center justify-center px-5 py-2.5 rounded-full whitespace-nowrap">
-                <img src={exportIcon} />
-                <p className="font-['Nunito',sans-serif] font-semibold leading-[14.4px] text-[#000] text-xs tracking-[0.12px]">
-                  Export
-                </p>
-                <img src={arrowDownBlack} className="size-5" />
-              </button>
             </div>
           </div>
 
