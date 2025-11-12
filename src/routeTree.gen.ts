@@ -29,6 +29,7 @@ import { Route as AuthenticatedWalletsIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCustomersIdRouteImport } from './routes/_authenticated/customers.$id'
 import { Route as ApiWalletsIdWithdrawalsRouteImport } from './routes/api/wallets/$id/withdrawals'
 import { Route as ApiWalletsIdTransfersRouteImport } from './routes/api/wallets/$id/transfers'
+import { Route as ApiWalletsIdDepositsRouteImport } from './routes/api/wallets/$id/deposits'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -132,6 +133,11 @@ const ApiWalletsIdTransfersRoute = ApiWalletsIdTransfersRouteImport.update({
   path: '/transfers',
   getParentRoute: () => ApiWalletsIdRoute,
 } as any)
+const ApiWalletsIdDepositsRoute = ApiWalletsIdDepositsRouteImport.update({
+  id: '/deposits',
+  path: '/deposits',
+  getParentRoute: () => ApiWalletsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/api/customers': typeof ApiCustomersIndexRoute
   '/api/users': typeof ApiUsersIndexRoute
   '/api/wallets': typeof ApiWalletsIndexRoute
+  '/api/wallets/$id/deposits': typeof ApiWalletsIdDepositsRoute
   '/api/wallets/$id/transfers': typeof ApiWalletsIdTransfersRoute
   '/api/wallets/$id/withdrawals': typeof ApiWalletsIdWithdrawalsRoute
 }
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/api/customers': typeof ApiCustomersIndexRoute
   '/api/users': typeof ApiUsersIndexRoute
   '/api/wallets': typeof ApiWalletsIndexRoute
+  '/api/wallets/$id/deposits': typeof ApiWalletsIdDepositsRoute
   '/api/wallets/$id/transfers': typeof ApiWalletsIdTransfersRoute
   '/api/wallets/$id/withdrawals': typeof ApiWalletsIdWithdrawalsRoute
 }
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/api/customers/': typeof ApiCustomersIndexRoute
   '/api/users/': typeof ApiUsersIndexRoute
   '/api/wallets/': typeof ApiWalletsIndexRoute
+  '/api/wallets/$id/deposits': typeof ApiWalletsIdDepositsRoute
   '/api/wallets/$id/transfers': typeof ApiWalletsIdTransfersRoute
   '/api/wallets/$id/withdrawals': typeof ApiWalletsIdWithdrawalsRoute
 }
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/api/customers'
     | '/api/users'
     | '/api/wallets'
+    | '/api/wallets/$id/deposits'
     | '/api/wallets/$id/transfers'
     | '/api/wallets/$id/withdrawals'
   fileRoutesByTo: FileRoutesByTo
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/api/customers'
     | '/api/users'
     | '/api/wallets'
+    | '/api/wallets/$id/deposits'
     | '/api/wallets/$id/transfers'
     | '/api/wallets/$id/withdrawals'
   id:
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/api/customers/'
     | '/api/users/'
     | '/api/wallets/'
+    | '/api/wallets/$id/deposits'
     | '/api/wallets/$id/transfers'
     | '/api/wallets/$id/withdrawals'
   fileRoutesById: FileRoutesById
@@ -423,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWalletsIdTransfersRouteImport
       parentRoute: typeof ApiWalletsIdRoute
     }
+    '/api/wallets/$id/deposits': {
+      id: '/api/wallets/$id/deposits'
+      path: '/deposits'
+      fullPath: '/api/wallets/$id/deposits'
+      preLoaderRoute: typeof ApiWalletsIdDepositsRouteImport
+      parentRoute: typeof ApiWalletsIdRoute
+    }
   }
 }
 
@@ -447,11 +466,13 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface ApiWalletsIdRouteChildren {
+  ApiWalletsIdDepositsRoute: typeof ApiWalletsIdDepositsRoute
   ApiWalletsIdTransfersRoute: typeof ApiWalletsIdTransfersRoute
   ApiWalletsIdWithdrawalsRoute: typeof ApiWalletsIdWithdrawalsRoute
 }
 
 const ApiWalletsIdRouteChildren: ApiWalletsIdRouteChildren = {
+  ApiWalletsIdDepositsRoute: ApiWalletsIdDepositsRoute,
   ApiWalletsIdTransfersRoute: ApiWalletsIdTransfersRoute,
   ApiWalletsIdWithdrawalsRoute: ApiWalletsIdWithdrawalsRoute,
 }

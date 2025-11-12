@@ -24,11 +24,11 @@ function parseCookies(cookieHeader: string | null): Record<string, string> {
   );
 }
 
-export const Route = createFileRoute("/api/wallets/$id/withdrawals")({
+export const Route = createFileRoute("/api/wallets/$id/deposits")({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
-        console.info("Fetching wallet withdrawals... @", request.url);
+        console.info("Fetching wallet deposits... @", request.url);
 
         const { id } = params;
         console.log("Wallet ID:", id);
@@ -91,7 +91,7 @@ export const Route = createFileRoute("/api/wallets/$id/withdrawals")({
 
         // Build query params object
         const queryParams: Record<string, any> = {
-          source: { wallet_key: id },
+          destination: { wallet_key: id },
         };
 
         if (start_date) queryParams.start_date = start_date;
@@ -120,7 +120,7 @@ export const Route = createFileRoute("/api/wallets/$id/withdrawals")({
         console.log("Query params:", queryParams);
 
         try {
-          const endpoint = `1.0/Customers/Wallets/Payments/Withdrawals/Fetch?payload=${encodeToBase64(queryParams)}`;
+          const endpoint = `1.0/Customers/Wallets/Deposits/Fiat/NG/Fetch?payload=${encodeToBase64(queryParams)}`;
 
           const response = await apiClient.get(endpoint, undefined, {
             Credentials: credentialsHeader,
@@ -130,7 +130,7 @@ export const Route = createFileRoute("/api/wallets/$id/withdrawals")({
 
           // Handle "No data" response (code 2003) as success with empty data
           if (response.code === 2003) {
-            console.log("No withdrawals found");
+            console.log("No deposits found");
             return json({
               success: true,
               data: [],
@@ -145,7 +145,7 @@ export const Route = createFileRoute("/api/wallets/$id/withdrawals")({
 
           // Check if the request was successful
           if (response.code !== 2000) {
-            console.error("Failed to fetch withdrawals:", response.message);
+            console.error("Failed to fetch deposits:", response.message);
             return json(
               {
                 success: false,
@@ -159,54 +159,48 @@ export const Route = createFileRoute("/api/wallets/$id/withdrawals")({
           // Transform the API response to match the expected format
           const transformedData = {
             success: true,
-            data: response.data.map((withdrawal: any) => ({
-              id: withdrawal.id,
-              reference: withdrawal.reference,
-              type: withdrawal.type,
-              mode: withdrawal.mode,
-              category: withdrawal.category,
-              service: `${withdrawal.type} - ${withdrawal.category}`,
-              currency: withdrawal.currency.symbol,
-              currencyCode: withdrawal.currency.code,
-              amount: `${withdrawal.currency.symbol}${withdrawal.amount.toFixed(2)}`,
-              fee: `${withdrawal.currency.symbol}${withdrawal.fee.toFixed(2)}`,
-              narration: withdrawal.narration,
+            data: response.data.map((deposit: any) => ({
+              id: deposit.id,
+              reference: deposit.reference,
+              type: deposit.type,
+              mode: deposit.mode,
+              category: deposit.category,
+              service: `${deposit.type} - ${deposit.category}`,
+              currency: deposit.currency.symbol,
+              currencyCode: deposit.currency.code,
+              amount: `${deposit.currency.symbol}${deposit.amount.toFixed(2)}`,
+              fee: `${deposit.currency.symbol}${deposit.fee.toFixed(2)}`,
+              narration: deposit.narration,
               wallet: {
-                reference: withdrawal.wallet.reference,
-                title: withdrawal.wallet.title,
+                reference: deposit.wallet.reference,
+                title: deposit.wallet.title,
               },
-              recipient: {
-                name: withdrawal.recipient.name,
-                accountNumber: withdrawal.recipient.account.number,
-                accountName: withdrawal.recipient.account.name,
-                bankName: withdrawal.recipient.bank?.name || "N/A",
-                bankCode: withdrawal.recipient.bank?.code || "N/A",
+              sender: {
+                name: deposit.sender.name,
+                accountNumber: deposit.sender.account?.number || "N/A",
+                accountName: deposit.sender.account?.name || "N/A",
+                bankName: deposit.sender.bank?.name || "N/A",
+                bankCode: deposit.sender.bank?.code || "N/A",
               },
-              status: withdrawal.status,
-              date: new Date(withdrawal.date_created).toLocaleDateString(
-                "en-US",
-                {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                }
-              ),
-              time: new Date(withdrawal.date_created).toLocaleTimeString(
-                "en-US",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              ),
-              dateCreated: withdrawal.date_created,
-              dateModified: withdrawal.date_modified,
+              status: deposit.status,
+              date: new Date(deposit.date_created).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              }),
+              time: new Date(deposit.date_created).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              dateCreated: deposit.date_created,
+              dateModified: deposit.date_modified,
             })),
             meta: response.meta,
           };
 
           return json(transformedData);
         } catch (error) {
-          console.error("Error fetching withdrawals:", error);
+          console.error("Error fetching deposits:", error);
           return json(
             {
               success: false,

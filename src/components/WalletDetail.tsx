@@ -99,9 +99,30 @@ export default function WalletDetail() {
     enabled: !!data?.data?.subWallets?.[selectedWallet]?.id && activeTab === "withdrawals",
   });
 
+  const {
+    data: depositsData,
+    isLoading: depositsLoading,
+    error: depositsError,
+  } = useQuery({
+    queryKey: ["deposits", id, selectedWallet],
+    queryFn: async () => {
+      if (!data?.data?.subWallets?.[selectedWallet]?.id) {
+        return { success: true, data: [], meta: { pagination: { page: 1, limit: 25 } } };
+      }
+      const walletId = data.data.subWallets[selectedWallet].id;
+      const response = await fetch(`/api/wallets/${walletId}/deposits`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch deposits");
+      }
+      return response.json();
+    },
+    enabled: !!data?.data?.subWallets?.[selectedWallet]?.id && activeTab === "deposits",
+  });
+
   console.log("data", data);
   console.log("transfersData", transfersData);
   console.log("withdrawalsData", withdrawalsData);
+  console.log("depositsData", depositsData);
 
   if (isLoading) {
     return (
@@ -620,6 +641,108 @@ export default function WalletDetail() {
                                             closingBalance: "N/A",
                                             referenceId: withdrawal.reference,
                                             status: withdrawal.status,
+                                          });
+                                          setShowReceipt(true);
+                                        }}
+                                      >
+                                        <svg
+                                          className="size-5 cursor-pointer"
+                                          viewBox="0 0 20 20"
+                                          fill="none"
+                                        >
+                                          <path
+                                            d="M7.5 14.1667L12.5 9.16667L7.5 4.16667"
+                                            stroke="#a2a2a2"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )
+                          )
+                        ) : activeTab === "deposits" ? (
+                          depositsLoading ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-sm">
+                                Loading deposits...
+                              </p>
+                            </div>
+                          ) : depositsError ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#912018] text-sm">
+                                Error loading deposits
+                              </p>
+                            </div>
+                          ) : !depositsData?.data || depositsData.data.length === 0 ? (
+                            <div className="flex items-center justify-center py-8">
+                              <p className="font-['Nunito',sans-serif] text-[#a2a2a2] text-sm">
+                                No deposits found
+                              </p>
+                            </div>
+                          ) : (
+                            depositsData.data.map(
+                              (deposit: any, index: number) => {
+                                const statusStyles = getStatusStyles(
+                                  deposit.status
+                                );
+                                const isEvenRow = index % 2 === 1;
+                                return (
+                                  <div
+                                    key={deposit.id || index}
+                                    className={`${
+                                      isEvenRow ? "bg-[rgba(10,10,10,0.2)]" : ""
+                                    } border-[#0a0a0a] border-b-[0.5px] border-solid flex h-10 items-start`}
+                                  >
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {deposit.service}
+                                      </p>
+                                    </div>
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {deposit.amount}
+                                      </p>
+                                    </div>
+                                    <div className="flex-1 border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {deposit.sender?.name || "N/A"}
+                                      </p>
+                                    </div>
+                                    <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[140px]">
+                                      <p className="font-['Nunito',sans-serif] font-normal leading-[22.4px] overflow-ellipsis overflow-hidden text-sm text-[#a2a2a2] text-nowrap tracking-[-0.28px]">
+                                        {deposit.date}
+                                      </p>
+                                    </div>
+                                    <div className="border-[#0a0a0a] border-r-[0.5px] border-solid flex items-center min-h-10 px-4 py-2 w-[132px]">
+                                      <div
+                                        className={`${statusStyles.bg} ${statusStyles.border} border-[0.5px] border-solid flex gap-1 items-center justify-center px-3 py-[2px] rounded-full`}
+                                      >
+                                        <p
+                                          className={`font-['Nunito',sans-serif] font-medium leading-[19.2px] overflow-ellipsis overflow-hidden text-xs ${statusStyles.text} text-nowrap tracking-[0.48px]`}
+                                        >
+                                          {deposit.status}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center justify-center min-h-10 px-4 py-2 w-[80px]">
+                                      <button
+                                        aria-label="View receipt"
+                                        onClick={() => {
+                                          setReceiptData({
+                                            service: deposit.service,
+                                            amount: deposit.amount,
+                                            date: deposit.date,
+                                            time: deposit.time,
+                                            fee: deposit.fee,
+                                            openingBalance: "N/A",
+                                            closingBalance: "N/A",
+                                            referenceId: deposit.reference,
+                                            status: deposit.status,
                                           });
                                           setShowReceipt(true);
                                         }}

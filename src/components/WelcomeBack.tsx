@@ -1,12 +1,10 @@
-import Logo from "./common/Logo";
-
-import bgImage from "../assets/images/bg-image.svg";
 import securityIcon from "../assets/icons/security-icon.svg";
 import { useEffect, useState } from "react";
 import type { SubAccount } from "../types/auth";
 import { cookieUtils } from "../lib/cookies";
 import { useAuthStore } from "../store/authStore";
 import SubAccountSelector from "./SubAccountSelector";
+import AuthLayout from "./layout/AuthLayout";
 
 export default function WelcomeBack() {
   const [error, setError] = useState<string | null>(null);
@@ -147,113 +145,80 @@ export default function WelcomeBack() {
   };
 
   return (
-    <div
-      className="bg-white grid grid-cols-[538px_1fr] h-screen"
-      data-name="WelcomeBack"
-    >
+    <AuthLayout>
+      {/* Welcome Message */}
       <div
-        className="relative box-border content-stretch flex flex-col h-full items-center justify-between overflow-hidden px-0 py-12"
-        data-name="LeftPanel"
+        className="content-stretch flex flex-col gap-8 items-center relative shrink-0 w-[400px]"
+        data-name="WelcomeMessage"
       >
-        <div
-          className="absolute h-[1092px] left-[-355px] top-0 w-[1456px]"
-          data-name="BackgroundImage"
-        >
-          <img alt="" className="block max-w-none size-full" src={bgImage} />
+        <div className="flex flex-col font-['Nunito',sans-serif] font-bold justify-end leading-none relative shrink-0 text-5xl text-nowrap text-white tracking-[0.12px]">
+          <h1 className="leading-[57.6px] whitespace-pre">Welcome back 👋</h1>
         </div>
 
-        <Logo className="h-6 overflow-hidden relative shrink-0 w-[102px] z-10" />
-
-        {/* Copyright */}
-        <div className="flex flex-col font-['Nunito',sans-serif] font-normal justify-end leading-none relative shrink-0 text-[#a2a2a2] text-base text-nowrap tracking-[0.024px] z-10">
-          <p className="leading-[25.6px] whitespace-pre">
-            © {new Date().getFullYear()} Redbiller. All rights reserved
-          </p>
-        </div>
-      </div>
-
-      {/* Right Panel - Login Form */}
-      <div
-        className="bg-[#181A0E] box-border content-stretch flex flex-col gap-12 h-full items-center justify-center overflow-hidden p-[72px]"
-        data-name="RightPanel"
-      >
-        {/* Welcome Message */}
+        {/* URL Confirmation */}
         <div
-          className="content-stretch flex flex-col gap-8 items-center relative shrink-0 w-[400px]"
-          data-name="WelcomeMessage"
+          className="content-stretch flex flex-col gap-4 items-center justify-center relative shrink-0 w-full"
+          data-name="URLConfirmation"
         >
-          <div className="flex flex-col font-['Nunito',sans-serif] font-bold justify-end leading-none relative shrink-0 text-5xl text-nowrap text-white tracking-[0.12px]">
-            <h1 className="leading-[57.6px] whitespace-pre">Welcome back 👋</h1>
+          <div className="flex flex-col font-['Nunito',sans-serif] font-normal justify-end leading-none min-w-full relative shrink-0 text-sm text-[#c0c0c0] text-center tracking-[-0.28px] w-[min-content]">
+            <p className="leading-[22.4px]">
+              Kindly confirm that you you're on
+            </p>
           </div>
-
-          {/* URL Confirmation */}
           <div
-            className="content-stretch flex flex-col gap-4 items-center justify-center relative shrink-0 w-full"
-            data-name="URLConfirmation"
+            className="bg-[#252a09] border-[#97ab27] border-[0.5px] border-solid box-border content-stretch flex gap-2 items-center justify-center px-8 py-2 relative rounded-full shrink-0"
+            data-name="URLContainer"
           >
-            <div className="flex flex-col font-['Nunito',sans-serif] font-normal justify-end leading-none min-w-full relative shrink-0 text-sm text-[#c0c0c0] text-center tracking-[-0.28px] w-[min-content]">
-              <p className="leading-[22.4px]">
-                Kindly confirm that you you're on
-              </p>
+            <div className="relative shrink-0 size-6" data-name="SecurityIcon">
+              <img
+                alt="Security"
+                className="block max-w-none size-full"
+                src={securityIcon}
+              />
             </div>
-            <div
-              className="bg-[#252a09] border-[#97ab27] border-[0.5px] border-solid box-border content-stretch flex gap-2 items-center justify-center px-8 py-2 relative rounded-full shrink-0"
-              data-name="URLContainer"
-            >
-              <div
-                className="relative shrink-0 size-6"
-                data-name="SecurityIcon"
-              >
-                <img
-                  alt="Security"
-                  className="block max-w-none size-full"
-                  src={securityIcon}
-                />
-              </div>
-              <div className="flex flex-col font-['Nunito',sans-serif] font-normal justify-end leading-none relative shrink-0 text-base text-nowrap text-white tracking-[0.024px]">
-                <p className="leading-[25.6px] whitespace-pre">
-                  https://app.sterllo.com
-                </p>
-              </div>
+            <div className="flex flex-col font-['Nunito',sans-serif] font-normal justify-end leading-none relative shrink-0 text-base text-nowrap text-white tracking-[0.024px]">
+              <p className="leading-[25.6px] whitespace-pre">
+                https://app.sterllo.com
+              </p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Form Container */}
-        <form
-          onSubmit={onSubmit}
-          className="content-stretch flex flex-col gap-8 items-center relative shrink-0 w-[400px]"
-          data-name="FormContainer"
+      {/* Form Container */}
+      <form
+        onSubmit={onSubmit}
+        className="content-stretch flex flex-col gap-8 items-center relative shrink-0 w-[400px]"
+        data-name="FormContainer"
+      >
+        {/* Error Message */}
+        {error && (
+          <div className="w-full bg-red-900/20 border border-red-500 rounded-lg px-4 py-3">
+            <p className="font-['Nunito',sans-serif] text-red-400 text-sm text-center">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Login Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-[#D3F60B] border-[#97ab27] border-[0.5px] border-solid relative rounded-full shrink-0 w-full hover:bg-[#a5bc2e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          data-name="LoginButton"
         >
-          {/* Error Message */}
-          {error && (
-            <div className="w-full bg-red-900/20 border border-red-500 rounded-lg px-4 py-3">
-              <p className="font-['Nunito',sans-serif] text-red-400 text-sm text-center">
-                {error}
+          <div className="box-border content-stretch flex gap-2 items-center justify-center overflow-hidden px-10 py-5 relative rounded-[inherit] w-full">
+            <div
+              className="box-border content-stretch flex gap-1 items-center justify-center px-1 py-0 relative shrink-0"
+              data-name="TextContainer"
+            >
+              <p className="font-['Nunito',sans-serif] font-semibold leading-[21.6px] relative shrink-0 text-[#262b0a] text-lg text-nowrap tracking-[0.18px] whitespace-pre">
+                {isLoading ? "Logging in..." : "Login"}
               </p>
             </div>
-          )}
-
-          {/* Login Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="bg-[#D3F60B] border-[#97ab27] border-[0.5px] border-solid relative rounded-full shrink-0 w-full hover:bg-[#a5bc2e] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            data-name="LoginButton"
-          >
-            <div className="box-border content-stretch flex gap-2 items-center justify-center overflow-hidden px-10 py-5 relative rounded-[inherit] w-full">
-              <div
-                className="box-border content-stretch flex gap-1 items-center justify-center px-1 py-0 relative shrink-0"
-                data-name="TextContainer"
-              >
-                <p className="font-['Nunito',sans-serif] font-semibold leading-[21.6px] relative shrink-0 text-[#262b0a] text-lg text-nowrap tracking-[0.18px] whitespace-pre">
-                  {isLoading ? "Logging in..." : "Login"}
-                </p>
-              </div>
-            </div>
-          </button>
-        </form>
-      </div>
-    </div>
+          </div>
+        </button>
+      </form>
+    </AuthLayout>
   );
 }
